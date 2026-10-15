@@ -142,6 +142,79 @@ module.exports = {
       },
     },
 
+    // ================= PROFILE =================
+    "/auth/profile": {
+      get: {
+        tags: ["Profile"],
+        summary: "Get my account + profile (any logged-in token)",
+        security: [{ bearerAuth: [] }],
+        responses: {
+          200: {
+            description: "User with profile (profile is null if not created yet)",
+            content: {
+              "application/json": {
+                schema: {
+                  type: "object",
+                  properties: {
+                    message: { type: "string", example: "Profile" },
+                    data: { $ref: "#/components/schemas/UserWithProfile" },
+                  },
+                },
+              },
+            },
+          },
+          401: { description: "Missing or invalid token" },
+          404: { description: "User not found" },
+        },
+      },
+      post: {
+        tags: ["Profile"],
+        summary: "Create my profile (only once; all fields optional)",
+        security: [{ bearerAuth: [] }],
+        requestBody: {
+          required: true,
+          content: { "application/json": { schema: { $ref: "#/components/schemas/ProfileInput" } } },
+        },
+        responses: {
+          201: { description: "Profile created" },
+          400: { description: "Invalid phone or date_of_birth" },
+          401: { description: "Missing or invalid token" },
+          409: { description: "Profile already exists, use PUT to update" },
+        },
+      },
+      put: {
+        tags: ["Profile"],
+        summary: "Update my existing profile (send only fields to change)",
+        security: [{ bearerAuth: [] }],
+        requestBody: {
+          required: true,
+          content: { "application/json": { schema: { $ref: "#/components/schemas/ProfileInput" } } },
+        },
+        responses: {
+          200: { description: "Profile updated" },
+          400: { description: "Invalid phone or date_of_birth" },
+          401: { description: "Missing or invalid token" },
+          404: { description: "Profile not found, use POST to create" },
+        },
+      },
+    },
+    "/auth/profile/{userId}": {
+      get: {
+        tags: ["Profile"],
+        summary: "Get any user's profile (admin token required)",
+        security: [{ bearerAuth: [] }],
+        parameters: [
+          { name: "userId", in: "path", required: true, schema: { type: "integer" }, example: 5 },
+        ],
+        responses: {
+          200: { description: "User with profile" },
+          401: { description: "Missing or invalid token" },
+          403: { description: "Forbidden: insufficient role" },
+          404: { description: "User not found" },
+        },
+      },
+    },
+
     // ================= ADMIN =================
     "/auth/admin/login": {
       post: {
@@ -217,6 +290,48 @@ module.exports = {
       bearerAuth: { type: "http", scheme: "bearer", bearerFormat: "JWT" },
     },
     schemas: {
+      ProfileInput: {
+        type: "object",
+        properties: {
+          firstName: { type: "string", example: "Sala" },
+          lastName: { type: "string", example: "User" },
+          avatar: { type: "string", example: "https://example.com/avatar.png" },
+          bio: { type: "string", example: "I love shopping" },
+          phone: { type: "string", example: "012345678", description: "6-15 digits, optional leading +" },
+          date_of_birth: { type: "string", format: "date", example: "2000-01-31" },
+        },
+      },
+      UserProfile: {
+        type: "object",
+        nullable: true,
+        properties: {
+          id: { type: "integer", example: 1 },
+          avatar: { type: "string", example: "https://example.com/avatar.png" },
+          bio: { type: "string", example: "I love shopping" },
+          phone: { type: "string", example: "012345678" },
+          date_of_birth: { type: "string", format: "date-time" },
+          createdAt: { type: "string", format: "date-time" },
+          updatedAt: { type: "string", format: "date-time" },
+        },
+      },
+      UserWithProfile: {
+        type: "object",
+        properties: {
+          id: { type: "integer", example: 5 },
+          firstName: { type: "string", example: "admin2" },
+          lastName: { type: "string", example: "admin2" },
+          email: { type: "string", example: "admin2@gmail.com" },
+          status: { type: "boolean", example: true },
+          profile: { $ref: "#/components/schemas/UserProfile" },
+          Roles: {
+            type: "array",
+            items: {
+              type: "object",
+              properties: { code: { type: "string", example: "admin" }, name: { type: "string", example: "Admin" } },
+            },
+          },
+        },
+      },
       RegisterInput: {
         type: "object",
         required: ["email", "password"],
