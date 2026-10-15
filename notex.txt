@@ -11,4 +11,5 @@
 11- npm install cors for secure middleware login 
 12- npm install uuid for create unique id
 13- npm install swagger-ui-express for create api documentation
+14- npm install bcrypt jsonwebtoken
 
