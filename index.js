@@ -13,8 +13,10 @@ app.use(cors());
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 app.use(express.json());
 const authRoutes = require("./src/routes/auth");
+const userProfileRoutes = require("./src/routes/user-profile");
 app.use("/product", productRoutes);
 app.use("/auth", authRoutes);
+app.use("/auth", userProfileRoutes);
 //connect with neon 
 const sequelize = new Sequelize(process.env.DATABASE_URL,{ 
     dialect: "postgres",
