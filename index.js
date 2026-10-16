@@ -17,11 +17,17 @@ const authRoutes = require("./src/routes/auth");
 const userProfileRoutes = require("./src/routes/user-profile");
 app.use("/product/:productId/images", require("./src/routes/product-image"));
 app.use("/product/:productId/variants", require("./src/routes/product-variant"));
+app.use("/product/:productId/reviews", require("./src/routes/review"));
 app.use("/product", productRoutes);
 app.use("/category", require("./src/routes/category"));
 app.use("/cart", require("./src/routes/cart"));
+app.use("/address", require("./src/routes/address"));
+app.use("/order", require("./src/routes/order"));
+app.use("/payment", require("./src/routes/payment"));
 app.use("/auth", authRoutes);
 app.use("/auth", userProfileRoutes);
+app.use("/role", require("./src/routes/role"));
+app.use("/user-role", require("./src/routes/user-role"));
 //connect with neon 
 const sequelize = new Sequelize(process.env.DATABASE_URL,{ 
     dialect: "postgres",
