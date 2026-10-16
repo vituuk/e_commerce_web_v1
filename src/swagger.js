@@ -116,6 +116,9 @@ module.exports = {
         summary: "List products with their category (public)",
         parameters: [
           { name: "categoryId", in: "query", required: false, schema: { type: "integer" }, description: "Filter by category" },
+          { name: "q", in: "query", required: false, schema: { type: "string" }, description: "Search by product name" },
+          { $ref: "#/components/parameters/Page" },
+          { $ref: "#/components/parameters/Limit" },
         ],
         responses: {
           200: {
@@ -466,6 +469,488 @@ module.exports = {
         },
       },
     },
+    // ================= REVIEW =================
+    "/product/{productId}/reviews": {
+      parameters: [{ name: "productId", in: "path", required: true, schema: { type: "integer" }, example: 1 }],
+      get: {
+        tags: ["Review"],
+        summary: "List reviews of a product with average rating (public)",
+        responses: {
+          200: {
+            description: "Reviews + summary",
+            content: {
+              "application/json": {
+                schema: {
+                  type: "object",
+                  properties: {
+                    message: { type: "string", example: "Product reviews" },
+                    data: { $ref: "#/components/schemas/ProductReviews" },
+                  },
+                },
+              },
+            },
+          },
+          404: { description: "Product not found" },
+        },
+      },
+      post: {
+        tags: ["Review"],
+        summary: "Write a review (any logged-in token; one per user per product)",
+        security: [{ bearerAuth: [] }],
+        requestBody: {
+          required: true,
+          content: { "application/json": { schema: { $ref: "#/components/schemas/ReviewInput" } } },
+        },
+        responses: {
+          201: { description: "Review created" },
+          400: { description: "rating must be an integer from 1 to 5 / invalid comment" },
+          401: { description: "Missing or invalid token" },
+          404: { description: "Product not found" },
+          409: { description: "You already reviewed this product, use PUT to update" },
+        },
+      },
+    },
+    "/product/{productId}/reviews/{id}": {
+      parameters: [
+        { name: "productId", in: "path", required: true, schema: { type: "integer" }, example: 1 },
+        { name: "id", in: "path", required: true, schema: { type: "integer" }, example: 1 },
+      ],
+      get: {
+        tags: ["Review"],
+        summary: "Get one review (public)",
+        responses: {
+          200: {
+            description: "Review",
+            content: {
+              "application/json": {
+                schema: {
+                  type: "object",
+                  properties: {
+                    message: { type: "string", example: "Review" },
+                    data: { $ref: "#/components/schemas/Review" },
+                  },
+                },
+              },
+            },
+          },
+          404: { description: "Review not found" },
+        },
+      },
+      put: {
+        tags: ["Review"],
+        summary: "Update my review (owner only, send only fields to change)",
+        security: [{ bearerAuth: [] }],
+        requestBody: {
+          required: true,
+          content: {
+            "application/json": {
+              schema: { $ref: "#/components/schemas/ReviewInput" },
+              example: { rating: 4 },
+            },
+          },
+        },
+        responses: {
+          200: { description: "Review updated" },
+          400: { description: "Invalid rating / comment" },
+          401: { description: "Missing or invalid token" },
+          403: { description: "You can only edit your own review" },
+          404: { description: "Review not found" },
+        },
+      },
+      delete: {
+        tags: ["Review"],
+        summary: "Delete review (owner or admin)",
+        security: [{ bearerAuth: [] }],
+        responses: {
+          200: { description: "Review deleted" },
+          401: { description: "Missing or invalid token" },
+          403: { description: "You can only delete your own review" },
+          404: { description: "Review not found" },
+        },
+      },
+    },
+    // ================= ADDRESS =================
+    "/address": {
+      get: {
+        tags: ["Address"],
+        summary: "List my addresses (default first)",
+        security: [{ bearerAuth: [] }],
+        responses: {
+          200: {
+            description: "My addresses",
+            content: {
+              "application/json": {
+                schema: {
+                  type: "object",
+                  properties: {
+                    message: { type: "string", example: "Addresses" },
+                    data: { type: "array", items: { $ref: "#/components/schemas/Address" } },
+                  },
+                },
+              },
+            },
+          },
+          401: { description: "Missing or invalid token" },
+        },
+      },
+      post: {
+        tags: ["Address"],
+        summary: "Create address (first address becomes default automatically)",
+        security: [{ bearerAuth: [] }],
+        requestBody: {
+          required: true,
+          content: { "application/json": { schema: { $ref: "#/components/schemas/AddressInput" } } },
+        },
+        responses: {
+          201: { description: "Address created" },
+          400: { description: "Missing field / invalid phone / invalid status" },
+          401: { description: "Missing or invalid token" },
+        },
+      },
+    },
+    "/address/default": {
+      get: {
+        tags: ["Address"],
+        summary: "Get my default address",
+        security: [{ bearerAuth: [] }],
+        responses: {
+          200: { description: "Default address" },
+          401: { description: "Missing or invalid token" },
+          404: { description: "No default address" },
+        },
+      },
+    },
+    "/address/{id}": {
+      parameters: [{ name: "id", in: "path", required: true, schema: { type: "integer" }, example: 1 }],
+      get: {
+        tags: ["Address"],
+        summary: "Get one of my addresses",
+        security: [{ bearerAuth: [] }],
+        responses: {
+          200: { description: "Address" },
+          401: { description: "Missing or invalid token" },
+          404: { description: "Address not found" },
+        },
+      },
+      put: {
+        tags: ["Address"],
+        summary: "Update my address (send only fields to change; status=true makes it default)",
+        security: [{ bearerAuth: [] }],
+        requestBody: {
+          required: true,
+          content: {
+            "application/json": {
+              schema: { $ref: "#/components/schemas/AddressInput" },
+              example: { street: "Street 271, Sangkat Toul Tompoung" },
+            },
+          },
+        },
+        responses: {
+          200: { description: "Address updated" },
+          400: { description: "Empty field / invalid phone / invalid status" },
+          401: { description: "Missing or invalid token" },
+          404: { description: "Address not found" },
+        },
+      },
+      delete: {
+        tags: ["Address"],
+        summary: "Delete my address (if default, newest remaining becomes default)",
+        security: [{ bearerAuth: [] }],
+        responses: {
+          200: { description: "Address deleted" },
+          401: { description: "Missing or invalid token" },
+          404: { description: "Address not found" },
+        },
+      },
+    },
+    "/address/{id}/default": {
+      patch: {
+        tags: ["Address"],
+        summary: "Set this address as my default",
+        security: [{ bearerAuth: [] }],
+        parameters: [{ name: "id", in: "path", required: true, schema: { type: "integer" }, example: 1 }],
+        responses: {
+          200: { description: "Default address set" },
+          401: { description: "Missing or invalid token" },
+          404: { description: "Address not found" },
+        },
+      },
+    },
+    // ================= ORDER =================
+    "/order": {
+      post: {
+        tags: ["Order"],
+        summary: "Checkout: turn my cart into an order (uses default address if addressId not sent)",
+        security: [{ bearerAuth: [] }],
+        requestBody: {
+          required: false,
+          content: { "application/json": { schema: { $ref: "#/components/schemas/CheckoutInput" } } },
+        },
+        responses: {
+          201: { $ref: "#/components/responses/OrderResponse" },
+          400: { description: "Cart is empty / No default address / Address not found / out of stock / variant unavailable" },
+          401: { description: "Missing or invalid token" },
+        },
+      },
+      get: {
+        tags: ["Order"],
+        summary: "List my orders (newest first)",
+        security: [{ bearerAuth: [] }],
+        responses: {
+          200: { $ref: "#/components/responses/OrderListResponse" },
+          401: { description: "Missing or invalid token" },
+        },
+      },
+    },
+    "/order/{id}": {
+      get: {
+        tags: ["Order"],
+        summary: "Get one of my orders",
+        security: [{ bearerAuth: [] }],
+        parameters: [{ name: "id", in: "path", required: true, schema: { type: "integer" }, example: 1 }],
+        responses: {
+          200: { $ref: "#/components/responses/OrderResponse" },
+          401: { description: "Missing or invalid token" },
+          404: { description: "Order not found" },
+        },
+      },
+    },
+    "/order/{id}/cancel": {
+      patch: {
+        tags: ["Order"],
+        summary: "Cancel my order (only while pending; stock is restored)",
+        security: [{ bearerAuth: [] }],
+        parameters: [{ name: "id", in: "path", required: true, schema: { type: "integer" }, example: 1 }],
+        responses: {
+          200: { $ref: "#/components/responses/OrderResponse" },
+          400: { description: "Cannot cancel an order that is paid/shipped/..." },
+          401: { description: "Missing or invalid token" },
+          404: { description: "Order not found" },
+        },
+      },
+    },
+    "/order/admin": {
+      get: {
+        tags: ["Order (Admin)"],
+        summary: "List all orders (admin token required)",
+        security: [{ bearerAuth: [] }],
+        parameters: [
+          { name: "status", in: "query", required: false, schema: { type: "string", enum: ["pending", "paid", "shipped", "delivered", "cancelled"] } },
+        ],
+        responses: {
+          200: { $ref: "#/components/responses/OrderListResponse" },
+          400: { description: "Invalid status filter" },
+          401: { description: "Missing or invalid token" },
+          403: { description: "Forbidden: insufficient role" },
+        },
+      },
+    },
+    "/order/admin/{id}": {
+      get: {
+        tags: ["Order (Admin)"],
+        summary: "Get any order (admin token required)",
+        security: [{ bearerAuth: [] }],
+        parameters: [{ name: "id", in: "path", required: true, schema: { type: "integer" }, example: 1 }],
+        responses: {
+          200: { $ref: "#/components/responses/OrderResponse" },
+          401: { description: "Missing or invalid token" },
+          403: { description: "Forbidden: insufficient role" },
+          404: { description: "Order not found" },
+        },
+      },
+    },
+    "/order/admin/{id}/status": {
+      patch: {
+        tags: ["Order (Admin)"],
+        summary: "Change order status (admin): pending→paid|cancelled, paid→shipped|cancelled, shipped→delivered",
+        security: [{ bearerAuth: [] }],
+        parameters: [{ name: "id", in: "path", required: true, schema: { type: "integer" }, example: 1 }],
+        requestBody: {
+          required: true,
+          content: { "application/json": { schema: { $ref: "#/components/schemas/OrderStatusInput" } } },
+        },
+        responses: {
+          200: { $ref: "#/components/responses/OrderResponse" },
+          400: { description: "Invalid status / Cannot change status from X to Y" },
+          401: { description: "Missing or invalid token" },
+          403: { description: "Forbidden: insufficient role" },
+          404: { description: "Order not found" },
+        },
+      },
+    },
+    "/order/{id}/invoice": {
+      get: {
+        tags: ["Order"],
+        summary: "Download invoice as .docx (owner or admin; not for cancelled orders)",
+        security: [{ bearerAuth: [] }],
+        parameters: [{ name: "id", in: "path", required: true, schema: { type: "integer" }, example: 1 }],
+        responses: {
+          200: {
+            description: "Invoice file",
+            content: {
+              "application/vnd.openxmlformats-officedocument.wordprocessingml.document": {
+                schema: { type: "string", format: "binary" },
+              },
+            },
+          },
+          400: { description: "Cancelled orders have no invoice" },
+          401: { description: "Missing or invalid token" },
+          404: { description: "Order not found" },
+          500: { description: "Invoice template not found / template error" },
+        },
+      },
+    },
+    "/order/admin/report": {
+      get: {
+        tags: ["Order (Admin)"],
+        summary: "Order report for a date range (admin). Default: last 30 days",
+        security: [{ bearerAuth: [] }],
+        parameters: [
+          { name: "from", in: "query", required: false, schema: { type: "string", format: "date" }, example: "2026-10-01" },
+          { name: "to", in: "query", required: false, schema: { type: "string", format: "date" }, example: "2026-10-31" },
+        ],
+        responses: {
+          200: {
+            description: "Report",
+            content: {
+              "application/json": {
+                schema: {
+                  type: "object",
+                  properties: {
+                    message: { type: "string", example: "Order report" },
+                    data: { $ref: "#/components/schemas/OrderReport" },
+                  },
+                },
+              },
+            },
+          },
+          400: { description: "Invalid from/to" },
+          401: { description: "Missing or invalid token" },
+          403: { description: "Forbidden: insufficient role" },
+        },
+      },
+    },
+    "/order/admin/report/export": {
+      get: {
+        tags: ["Order (Admin)"],
+        summary: "Download order report as .xlsx (Summary, Orders, Top products, Daily sheets)",
+        security: [{ bearerAuth: [] }],
+        parameters: [
+          { name: "from", in: "query", required: false, schema: { type: "string", format: "date" }, example: "2026-10-01" },
+          { name: "to", in: "query", required: false, schema: { type: "string", format: "date" }, example: "2026-10-31" },
+        ],
+        responses: {
+          200: {
+            description: "Excel file",
+            content: {
+              "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": {
+                schema: { type: "string", format: "binary" },
+              },
+            },
+          },
+          400: { description: "Invalid from/to" },
+          401: { description: "Missing or invalid token" },
+          403: { description: "Forbidden: insufficient role" },
+        },
+      },
+    },
+    // ================= PAYMENT =================
+    "/payment/checkout": {
+      post: {
+        tags: ["Payment"],
+        summary: "Start ABA PayWay payment for my pending order (returns form fields to POST to PayWay)",
+        security: [{ bearerAuth: [] }],
+        requestBody: {
+          required: true,
+          content: { "application/json": { schema: { $ref: "#/components/schemas/PaymentCheckoutInput" } } },
+        },
+        responses: {
+          201: {
+            description: "Payment created",
+            content: {
+              "application/json": {
+                schema: {
+                  type: "object",
+                  properties: {
+                    message: { type: "string", example: "Payment created, submit fields to action_url" },
+                    data: { $ref: "#/components/schemas/PaymentCheckout" },
+                  },
+                },
+              },
+            },
+          },
+          400: { description: "orderId is required / invalid payment_option / Order is not pending" },
+          401: { description: "Missing or invalid token" },
+          404: { description: "Order not found" },
+          500: { description: "PayWay is not configured" },
+        },
+      },
+    },
+    "/payment/callback": {
+      post: {
+        tags: ["Payment"],
+        summary: "PayWay pushback (public, called by PayWay server). Status is re-checked with PayWay before trusting it",
+        requestBody: {
+          required: true,
+          content: {
+            "application/json": {
+              schema: {
+                type: "object",
+                properties: {
+                  tran_id: { type: "string", example: "12-mgq3k2x1" },
+                  apv: { type: "string", example: "123456" },
+                  status: { type: "string", example: "0" },
+                },
+              },
+            },
+          },
+        },
+        responses: {
+          200: { description: "OK" },
+          400: { description: "tran_id is required" },
+          404: { description: "Payment not found" },
+        },
+      },
+    },
+    "/payment/verify/{tranId}": {
+      get: {
+        tags: ["Payment"],
+        summary: "Check my payment status with PayWay and update order (use after paying)",
+        security: [{ bearerAuth: [] }],
+        parameters: [{ name: "tranId", in: "path", required: true, schema: { type: "string" }, example: "12-mgq3k2x1" }],
+        responses: {
+          200: { description: "Payment status" },
+          401: { description: "Missing or invalid token" },
+          404: { description: "Payment not found" },
+        },
+      },
+    },
+    "/payment": {
+      get: {
+        tags: ["Payment"],
+        summary: "List my payments",
+        security: [{ bearerAuth: [] }],
+        responses: {
+          200: { description: "My payments" },
+          401: { description: "Missing or invalid token" },
+        },
+      },
+    },
+    "/payment/admin": {
+      get: {
+        tags: ["Payment"],
+        summary: "List all payments (admin token required)",
+        security: [{ bearerAuth: [] }],
+        parameters: [
+          { name: "status", in: "query", required: false, schema: { type: "string", enum: ["pending", "success", "failed"] } },
+        ],
+        responses: {
+          200: { description: "All payments" },
+          401: { description: "Missing or invalid token" },
+          403: { description: "Forbidden: insufficient role" },
+        },
+      },
+    },
     // ================= USER =================
     "/auth/user/register": {
       post: {
@@ -652,6 +1137,34 @@ module.exports = {
           },
         },
       },
+      OrderResponse: {
+        description: "Order with its items",
+        content: {
+          "application/json": {
+            schema: {
+              type: "object",
+              properties: {
+                message: { type: "string", example: "Order" },
+                data: { $ref: "#/components/schemas/Order" },
+              },
+            },
+          },
+        },
+      },
+      OrderListResponse: {
+        description: "List of orders",
+        content: {
+          "application/json": {
+            schema: {
+              type: "object",
+              properties: {
+                message: { type: "string", example: "My orders" },
+                data: { type: "array", items: { $ref: "#/components/schemas/Order" } },
+              },
+            },
+          },
+        },
+      },
       CartResponse: {
         description: "Full cart after the operation",
         content: {
@@ -666,6 +1179,10 @@ module.exports = {
           },
         },
       },
+    },
+    parameters: {
+      Page: { name: "page", in: "query", required: false, schema: { type: "integer", minimum: 1, default: 1 }, description: "Page number (starts at 1)" },
+      Limit: { name: "limit", in: "query", required: false, schema: { type: "integer", minimum: 1, maximum: 100, default: 10 }, description: "Items per page (max 100)" },
     },
     securitySchemes: {
       bearerAuth: { type: "http", scheme: "bearer", bearerFormat: "JWT" },
@@ -967,6 +1484,201 @@ module.exports = {
           items: { type: "array", items: { $ref: "#/components/schemas/CartItem" } },
           total_qty: { type: "integer", example: 2 },
           total_price: { type: "number", example: 1999.98 },
+        },
+      },
+      ReviewInput: {
+        type: "object",
+        required: ["rating"],
+        properties: {
+          rating: { type: "integer", minimum: 1, maximum: 5, example: 5 },
+          comment: { type: "string", nullable: true, example: "Great phone, fast delivery!", description: "max 2000 characters" },
+        },
+      },
+      Review: {
+        type: "object",
+        properties: {
+          id: { type: "integer", example: 1 },
+          userId: { type: "integer", example: 5 },
+          productId: { type: "integer", example: 1 },
+          rating: { type: "integer", example: 5 },
+          comment: { type: "string", nullable: true, example: "Great phone, fast delivery!" },
+          createdAt: { type: "string", format: "date-time" },
+          updatedAt: { type: "string", format: "date-time" },
+          user: {
+            type: "object",
+            properties: {
+              id: { type: "integer", example: 5 },
+              firstName: { type: "string", example: "Sala" },
+              lastName: { type: "string", example: "User" },
+            },
+          },
+        },
+      },
+      ProductReviews: {
+        type: "object",
+        properties: {
+          product: { $ref: "#/components/schemas/ProductSummary" },
+          average_rating: { type: "number", example: 4.5 },
+          total_reviews: { type: "integer", example: 2 },
+          breakdown: {
+            type: "object",
+            description: "Number of reviews per star",
+            example: { 1: 0, 2: 0, 3: 0, 4: 1, 5: 1 },
+          },
+          reviews: { type: "array", items: { $ref: "#/components/schemas/Review" } },
+        },
+      },
+      AddressInput: {
+        type: "object",
+        required: ["receiver_name", "phone", "street", "city"],
+        properties: {
+          receiver_name: { type: "string", example: "Sala User" },
+          phone: { type: "string", example: "012345678", description: "6-15 digits, optional leading +" },
+          street: { type: "string", example: "#12, Street 310, Sangkat BKK1" },
+          city: { type: "string", example: "Phnom Penh" },
+          status: { type: "boolean", example: false, description: "true = make this the default address" },
+        },
+      },
+      Address: {
+        type: "object",
+        properties: {
+          id: { type: "integer", example: 1 },
+          userId: { type: "integer", example: 5 },
+          receiver_name: { type: "string", example: "Sala User" },
+          phone: { type: "string", example: "012345678" },
+          street: { type: "string", example: "#12, Street 310, Sangkat BKK1" },
+          city: { type: "string", example: "Phnom Penh" },
+          status: { type: "boolean", example: true, description: "true = default address" },
+          createdAt: { type: "string", format: "date-time" },
+          updatedAt: { type: "string", format: "date-time" },
+        },
+      },
+      CheckoutInput: {
+        type: "object",
+        properties: {
+          addressId: { type: "integer", example: 1, description: "Optional. Defaults to my default address" },
+        },
+      },
+      OrderStatusInput: {
+        type: "object",
+        required: ["status"],
+        properties: {
+          status: { type: "string", enum: ["paid", "shipped", "delivered", "cancelled"], example: "paid" },
+        },
+      },
+      OrderItem: {
+        type: "object",
+        properties: {
+          id: { type: "integer", example: 1 },
+          orderId: { type: "integer", example: 1 },
+          variantId: { type: "integer", nullable: true, example: 1 },
+          product_name: { type: "string", example: "iPhone 15" },
+          sku: { type: "string", example: "IP15-BLK-128" },
+          color: { type: "string", nullable: true, example: "Black" },
+          size: { type: "string", nullable: true, example: "128GB" },
+          unit_price: { type: "string", example: "999.99" },
+          quantity: { type: "integer", example: 2 },
+          amount: { type: "string", example: "1999.98", description: "unit_price × quantity" },
+        },
+      },
+      Order: {
+        type: "object",
+        properties: {
+          id: { type: "integer", example: 1 },
+          userId: { type: "integer", example: 5 },
+          addressId: { type: "integer", nullable: true, example: 1 },
+          order_number: { type: "string", example: "ORD-20261016-4F7K2Q" },
+          shipping_receiver_name: { type: "string", example: "Sala User" },
+          shipping_phone: { type: "string", example: "012345678" },
+          shipping_street: { type: "string", example: "#12, Street 310, Sangkat BKK1" },
+          shipping_city: { type: "string", example: "Phnom Penh" },
+          sub_total: { type: "string", example: "1999.98" },
+          discount: { type: "string", example: "0.00" },
+          shipping_fee: { type: "string", example: "0.00" },
+          total: { type: "string", example: "1999.98" },
+          status: { type: "string", enum: ["pending", "paid", "shipped", "delivered", "cancelled"], example: "pending" },
+          createdAt: { type: "string", format: "date-time" },
+          updatedAt: { type: "string", format: "date-time" },
+          items: { type: "array", items: { $ref: "#/components/schemas/OrderItem" } },
+        },
+      },
+      PaymentCheckoutInput: {
+        type: "object",
+        required: ["orderId"],
+        properties: {
+          orderId: { type: "integer", example: 1 },
+          payment_option: {
+            type: "string",
+            enum: ["abapay_khqr", "abapay_khqr_deeplink", "cards", "alipay", "wechat"],
+            example: "abapay_khqr",
+            description: "default abapay_khqr",
+          },
+        },
+      },
+      OrderReport: {
+        type: "object",
+        properties: {
+          from: { type: "string", example: "2026-10-01" },
+          to: { type: "string", example: "2026-10-31" },
+          total_orders: { type: "integer", example: 12 },
+          paid_orders: { type: "integer", example: 9, description: "paid + shipped + delivered" },
+          revenue: { type: "number", example: 2450.5 },
+          average_order_value: { type: "number", example: 272.28 },
+          by_status: {
+            type: "object",
+            example: { pending: 2, paid: 3, shipped: 2, delivered: 4, cancelled: 1 },
+          },
+          top_products: {
+            type: "array",
+            items: {
+              type: "object",
+              properties: {
+                product_name: { type: "string", example: "iPhone 15" },
+                quantity: { type: "integer", example: 7 },
+                revenue: { type: "number", example: 6999.93 },
+              },
+            },
+          },
+          daily: {
+            type: "array",
+            items: {
+              type: "object",
+              properties: {
+                date: { type: "string", example: "2026-10-16" },
+                orders: { type: "integer", example: 3 },
+                revenue: { type: "number", example: 594.95 },
+              },
+            },
+          },
+        },
+      },
+      Payment: {
+        type: "object",
+        properties: {
+          id: { type: "integer", example: 1 },
+          userId: { type: "integer", example: 5 },
+          orderId: { type: "integer", example: 1 },
+          paywayTranId: { type: "string", example: "12-mgq3k2x1" },
+          method: { type: "string", example: "abapay_khqr" },
+          amount: { type: "string", example: "1999.98" },
+          status: { type: "string", enum: ["pending", "success", "failed"], example: "pending" },
+          paidAt: { type: "string", format: "date-time", nullable: true },
+          remark: { type: "string", nullable: true },
+          createdAt: { type: "string", format: "date-time" },
+          updatedAt: { type: "string", format: "date-time" },
+        },
+      },
+      PaymentCheckout: {
+        type: "object",
+        properties: {
+          payment: { $ref: "#/components/schemas/Payment" },
+          action_url: { type: "string", example: "https://checkout-sandbox.payway.com.kh/api/payment-gateway/v1/payments/purchase" },
+          method: { type: "string", example: "POST" },
+          fields: {
+            type: "object",
+            description: "Submit these as a form (multipart/form-data) to action_url",
+            additionalProperties: { type: "string" },
+          },
         },
       },
     },
