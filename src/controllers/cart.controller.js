@@ -20,10 +20,55 @@ const getCart=async(req,res)=>{
     }
 };
 
-// POST /cart/items   body: {variantId, quantity}
+// GET /cart/admin
+const listAllCarts=async(req,res)=>{
+    try{
+        const data=await cartService.listAllCarts(req.user.id);
+        return res.status(200).json({message:"All carts",data});
+    }
+    catch(error){
+        return handleError(res,error,"Get all carts");
+    }
+};
+
+// POST /cart/admin
+const createCartForUser=async(req,res)=>{
+    try{
+        const targetUserId=req.body?.userId || req.user.id;
+        const data=await cartService.createCartForUser(targetUserId);
+        return res.status(201).json({message:"Cart created",data});
+    }
+    catch(error){
+        return handleError(res,error,"Create cart");
+    }
+};
+
+// PUT /cart/admin/:id
+const updateCartById=async(req,res)=>{
+    try{
+        const data=await cartService.updateCartById(req.params.id,req.body || {});
+        return res.status(200).json({message:"Cart updated",data});
+    }
+    catch(error){
+        return handleError(res,error,"Update cart");
+    }
+};
+
+// DELETE /cart/admin/:id
+const deleteCartById=async(req,res)=>{
+    try{
+        await cartService.deleteCartById(req.params.id);
+        return res.status(200).json({message:"Cart deleted"});
+    }
+    catch(error){
+        return handleError(res,error,"Delete cart");
+    }
+};
+
+// POST /cart/items   body: {variantId, quantity, cartId?}
 const addItem=async(req,res)=>{
     try{
-        const data=await cartService.addItem(req.user.id,req.body || {});
+        const data=await cartService.addItem(req.user,req.body || {});
         return res.status(201).json({message:"Item added to cart",data});
     }
     catch(error){
@@ -34,7 +79,7 @@ const addItem=async(req,res)=>{
 // PUT /cart/items/:id   body: {quantity}
 const updateItem=async(req,res)=>{
     try{
-        const data=await cartService.updateItem(req.user.id,req.params.id,req.body || {});
+        const data=await cartService.updateItem(req.user,req.params.id,req.body || {});
         return res.status(200).json({message:"Cart item updated",data});
     }
     catch(error){
@@ -45,7 +90,7 @@ const updateItem=async(req,res)=>{
 // DELETE /cart/items/:id
 const removeItem=async(req,res)=>{
     try{
-        const data=await cartService.removeItem(req.user.id,req.params.id);
+        const data=await cartService.removeItem(req.user,req.params.id);
         return res.status(200).json({message:"Cart item removed",data});
     }
     catch(error){
@@ -64,4 +109,4 @@ const clearCart=async(req,res)=>{
     }
 };
 
-module.exports={getCart,addItem,updateItem,removeItem,clearCart};
+module.exports={getCart,listAllCarts,createCartForUser,updateCartById,deleteCartById,addItem,updateItem,removeItem,clearCart};

@@ -12,7 +12,12 @@ const findOrFail=async(id,options)=>{
 // ?q=phone&is_active=true&page=1&limit=10
 const list=(query={})=>{
     const where={};
-    if(query.q) where.name={[Op.iLike]:`%${query.q}%`};
+    if(query.q){
+        where[Op.or]=[
+            {name:{[Op.iLike]:`%${query.q}%`}},
+            {slug:{[Op.iLike]:`%${query.q}%`}}
+        ];
+    }
     const active=parseBool(query.is_active);
     if(active!==undefined) where.is_active=active;
     return paginate(Category,{where,order:[["id","ASC"]]},query);

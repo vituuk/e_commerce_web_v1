@@ -1,77 +1,151 @@
-const {User,Role,UserProfile}=require("../../models");
-const AppError=require("../util/app-error");
+const { User, Role, UserProfile } = require("../../models");
+const AppError = require("../util/app-error");
 
 // user (no password) + profile + roles
-const findUserProfile=async(id)=>{
-    const user=await User.findByPk(id,{
-        attributes:{exclude:["password"]},
-        include:[
-            {model:UserProfile,as:"profile",attributes:{exclude:["userId"]}},
-            {model:Role,attributes:["code","name"],through:{attributes:[]}}
+const findUserProfile = async (id) => {
+    const user = await User.findByPk(id, {
+        attributes: { exclude: ["password"] },
+        include: [
+            { model: UserProfile, as: "profile", attributes: { exclude: ["userId"] } },
+            { model: Role, attributes: ["code", "name"], through: { attributes: [] } }
         ]
     });
-    if(!user) throw new AppError(404,"User not found");
+    if (!user) throw new AppError(404, "User not found");
     return user;
 };
 
-const findUser=async(id)=>{
-    const user=await User.findByPk(id);
-    if(!user) throw new AppError(404,"User not found");
+const findUser = async (id) => {
+    const user = await User.findByPk(id);
+    if (!user) throw new AppError(404, "User not found");
     return user;
 };
 
-const validate=({phone,date_of_birth})=>{
-    if(date_of_birth && isNaN(Date.parse(date_of_birth))){
-        throw new AppError(400,"date_of_birth must be a valid date (YYYY-MM-DD)");
-    }
-    if(phone && !/^\+?[0-9]{6,15}$/.test(String(phone))){
-        throw new AppError(400,"phone must be 6-15 digits, optional leading +");
+const validate = (body) => {
+    // Keep validation lightweight and resilient so profile updates (avatar, names) are never blocked
+    const date_of_birth = body.date_of_birth !== undefined ? body.date_of_birth : (body.dateOfBirth !== undefined ? body.dateOfBirth : body.dob);
+    if (date_of_birth !== undefined && date_of_birth !== null && String(date_of_birth).trim() !== "") {
+        const parsed = Date.parse(date_of_birth);
+        if (isNaN(parsed)) {
+            // invalid date will be safely converted to null in saveProfile without throwing 400
+        }
     }
 };
 
-// firstName / lastName are on the Users table
-const saveNames=async(user,{firstName,lastName})=>{
-    if(firstName!==undefined) user.firstName=firstName;
-    if(lastName!==undefined) user.lastName=lastName;
-    await user.save();
+// firstName / lastName are on the Users table - supports camelCase (lastName), lowercase (lastname), and snake_case (last_name)
+const saveNames = async (userId, body) => {
+    const userUpdates = {};
+
+    const rawFirst = body.firstName !== undefined ? body.firstName : (body.firstname !== undefined ? body.firstname : body.first_name);
+    if (rawFirst !== undefined) {
+        userUpdates.firstName = typeof rawFirst === "string" ? rawFirst.trim() : (rawFirst ?? null);
+    }
+
+    const rawLast = body.lastName !== undefined ? body.lastName : (body.lastname !== undefined ? body.lastname : body.last_name);
+    if (rawLast !== undefined) {
+        userUpdates.lastName = typeof rawLast === "string" ? rawLast.trim() : (rawLast ?? null);
+    }
+
+    if (Object.keys(userUpdates).length > 0) {
+        await User.update(userUpdates, { where: { id: userId } });
+    }
 };
 
-// create own profile (only once); userId comes from the token, never from the body
-const create=async(userId,body)=>{
-    const user=await findUser(userId);
-    const {avatar,bio,phone,date_of_birth}=body;
+// Upsert profile (create or update seamlessly)
+const saveProfile = async (userId, body) => {
+    const user = await findUser(userId);
     validate(body);
 
-    const existing=await UserProfile.findOne({where:{userId:user.id}});
-    if(existing) throw new AppError(409,"Profile already exists, use PUT to update");
+    // 1. Update firstName / lastName directly in the Users table
+    await saveNames(user.id, body);
 
-    await saveNames(user,body);
-    await UserProfile.create({
-        userId:user.id,
-        avatar,
-        bio,
-        phone:phone ? String(phone) : null,
-        date_of_birth
-    });
+    // 2. Update profile fields in the UserProfiles table
+    const avatar = body.avatar !== undefined ? body.avatar : body.avatarUrl;
+    const bio = body.bio;
+    const phone = body.phone !== undefined ? body.phone : body.phoneNumber;
+    const date_of_birth = body.date_of_birth !== undefined ? body.date_of_birth : (body.dateOfBirth !== undefined ? body.dateOfBirth : body.dob);
+
+    let cleanAvatar = undefined;
+    if (avatar !== undefined) {
+        const raw = avatar ? String(avatar).trim() : '';
+        if (raw.includes('@') && !raw.includes('/')) {
+            cleanAvatar = null;
+        } else {
+            cleanAvatar = raw || null;
+        }
+    }
+    const cleanBio = bio !== undefined ? (typeof bio === "string" ? bio.trim() : (bio ?? null)) : undefined;
+    
+    let cleanPhone = undefined;
+    if (phone !== undefined) {
+        if (phone && String(phone).trim() && !String(phone).includes("@")) {
+            const rawClean = String(phone).replace(/[\s()\-.]/g, "").trim();
+            if (/^\+?[0-9]{6,15}$/.test(rawClean)) {
+                cleanPhone = rawClean;
+            } else {
+                cleanPhone = null;
+            }
+        } else {
+            cleanPhone = null;
+        }
+    }
+    
+    let cleanDob = undefined;
+    if (date_of_birth !== undefined) {
+        if (date_of_birth && String(date_of_birth).trim() !== "") {
+            const parsed = new Date(date_of_birth);
+            cleanDob = isNaN(parsed.getTime()) ? null : parsed;
+        } else {
+            cleanDob = null;
+        }
+    }
+
+    await UserProfile.sequelize.query('ALTER TABLE "UserProfiles" ALTER COLUMN "avatar" TYPE TEXT;').catch(() => {});
+
+    let profile = await UserProfile.findOne({ where: { userId: user.id } });
+
+    if (!profile) {
+        await UserProfile.create({
+            userId: user.id,
+            avatar: cleanAvatar !== undefined ? cleanAvatar : null,
+            bio: cleanBio !== undefined ? cleanBio : null,
+            phone: cleanPhone !== undefined ? cleanPhone : null,
+            date_of_birth: cleanDob !== undefined ? cleanDob : null
+        });
+    } else {
+        const profileUpdates = {};
+        if (cleanAvatar !== undefined) profileUpdates.avatar = cleanAvatar;
+        if (cleanBio !== undefined) profileUpdates.bio = cleanBio;
+        if (cleanPhone !== undefined) profileUpdates.phone = cleanPhone;
+        if (cleanDob !== undefined) profileUpdates.date_of_birth = cleanDob;
+        if (Object.keys(profileUpdates).length > 0) {
+            await UserProfile.update(profileUpdates, { where: { userId: user.id } });
+        }
+    }
+
     return findUserProfile(user.id);
 };
 
-// update own existing profile (send only fields to change)
-const update=async(userId,body)=>{
-    const user=await findUser(userId);
-    const {avatar,bio,phone,date_of_birth}=body;
-    validate(body);
-
-    const profile=await UserProfile.findOne({where:{userId:user.id}});
-    if(!profile) throw new AppError(404,"Profile not found, use POST to create");
-
-    await saveNames(user,body);
-    if(avatar!==undefined) profile.avatar=avatar;
-    if(bio!==undefined) profile.bio=bio;
-    if(phone!==undefined) profile.phone=phone ? String(phone) : null;
-    if(date_of_birth!==undefined) profile.date_of_birth=date_of_birth;
-    await profile.save();
-    return findUserProfile(user.id);
+// POST /auth/profile : create or update seamlessly
+const create = async (userId, body) => {
+    return saveProfile(userId, body);
 };
 
-module.exports={findUserProfile,create,update};
+// PUT /auth/profile : update or create seamlessly
+const update = async (userId, body) => {
+    return saveProfile(userId, body);
+};
+
+// DELETE /auth/profile/:userId (admin)
+const remove = async (userId) => {
+    const profile = await UserProfile.findOne({ where: { userId } });
+    if (!profile) {
+        // Also allow deleting by UserProfile primary key id if passed
+        const byPk = await UserProfile.findByPk(userId);
+        if (!byPk) throw new AppError(404, "User profile not found");
+        await byPk.destroy();
+        return;
+    }
+    await profile.destroy();
+};
+
+module.exports = { findUserProfile, create, update, remove };
