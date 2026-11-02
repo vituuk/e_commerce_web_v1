@@ -275,7 +275,7 @@ module.exports = {
       },
       put: {
         tags: ["Product Image"],
-        summary: "Update image (admin token required; is_primary=true unsets others)",
+        summary: "Update image or reassign productId (admin token required; is_primary=true unsets others)",
         security: [{ bearerAuth: [] }],
         requestBody: {
           required: false,
@@ -680,7 +680,7 @@ module.exports = {
     "/order": {
       post: {
         tags: ["Order"],
-        summary: "Checkout: turn my cart into an order (uses default address if addressId not sent)",
+        summary: "Create order / Checkout: uses CartItems if present, or direct items / sub_total when cart is empty",
         security: [{ bearerAuth: [] }],
         requestBody: {
           required: false,
@@ -736,10 +736,31 @@ module.exports = {
         security: [{ bearerAuth: [] }],
         parameters: [
           { name: "status", in: "query", required: false, schema: { type: "string", enum: ["pending", "paid", "shipped", "delivered", "cancelled"] } },
+          { name: "q", in: "query", required: false, schema: { type: "string" }, description: "Search by order_number" },
+          { name: "userId", in: "query", required: false, schema: { type: "integer" } },
+          { name: "from", in: "query", required: false, schema: { type: "string", format: "date" } },
+          { name: "to", in: "query", required: false, schema: { type: "string", format: "date" } },
+          { name: "page", in: "query", required: false, schema: { type: "integer", default: 1 } },
+          { name: "limit", in: "query", required: false, schema: { type: "integer", default: 10 } },
         ],
         responses: {
           200: { $ref: "#/components/responses/OrderListResponse" },
-          400: { description: "Invalid status filter" },
+          400: { description: "Invalid status or date filter" },
+          401: { description: "Missing or invalid token" },
+          403: { description: "Forbidden: insufficient role" },
+        },
+      },
+      post: {
+        tags: ["Order (Admin)"],
+        summary: "Create a new order record directly with discount and shipping fee (admin)",
+        security: [{ bearerAuth: [] }],
+        requestBody: {
+          required: true,
+          content: { "application/json": { schema: { $ref: "#/components/schemas/AdminOrderCreateInput" } } },
+        },
+        responses: {
+          201: { $ref: "#/components/responses/OrderResponse" },
+          400: { description: "Invalid discount / shipping_fee / sub_total" },
           401: { description: "Missing or invalid token" },
           403: { description: "Forbidden: insufficient role" },
         },
@@ -753,6 +774,71 @@ module.exports = {
         parameters: [{ name: "id", in: "path", required: true, schema: { type: "integer" }, example: 1 }],
         responses: {
           200: { $ref: "#/components/responses/OrderResponse" },
+          401: { description: "Missing or invalid token" },
+          403: { description: "Forbidden: insufficient role" },
+          404: { description: "Order not found" },
+        },
+      },
+      put: {
+        tags: ["Order (Admin)"],
+        summary: "Update an order (discount, shipping_fee, sub_total, status, shipping info) and auto-recalculate total (admin)",
+        security: [{ bearerAuth: [] }],
+        parameters: [{ name: "id", in: "path", required: true, schema: { type: "integer" }, example: 1 }],
+        requestBody: {
+          required: true,
+          content: { "application/json": { schema: { $ref: "#/components/schemas/AdminOrderUpdateInput" } } },
+        },
+        responses: {
+          200: { $ref: "#/components/responses/OrderResponse" },
+          400: { description: "Invalid input" },
+          401: { description: "Missing or invalid token" },
+          403: { description: "Forbidden: insufficient role" },
+          404: { description: "Order not found" },
+        },
+      },
+      patch: {
+        tags: ["Order (Admin)"],
+        summary: "Partially update order discount, shipping_fee, or status (auto-recalculates total)",
+        security: [{ bearerAuth: [] }],
+        parameters: [{ name: "id", in: "path", required: true, schema: { type: "integer" }, example: 1 }],
+        requestBody: {
+          required: true,
+          content: { "application/json": { schema: { $ref: "#/components/schemas/AdminOrderUpdateInput" } } },
+        },
+        responses: {
+          200: { $ref: "#/components/responses/OrderResponse" },
+          400: { description: "Invalid input" },
+          401: { description: "Missing or invalid token" },
+          403: { description: "Forbidden: insufficient role" },
+          404: { description: "Order not found" },
+        },
+      },
+      delete: {
+        tags: ["Order (Admin)"],
+        summary: "Delete an order and restore stock if not already cancelled (admin)",
+        security: [{ bearerAuth: [] }],
+        parameters: [{ name: "id", in: "path", required: true, schema: { type: "integer" }, example: 1 }],
+        responses: {
+          200: { description: "Order deleted" },
+          401: { description: "Missing or invalid token" },
+          403: { description: "Forbidden: insufficient role" },
+          404: { description: "Order not found" },
+        },
+      },
+    },
+    "/order/admin/{id}/pricing": {
+      patch: {
+        tags: ["Order (Admin)"],
+        summary: "Update discount and shipping_fee on an order and auto-recalculate total (admin)",
+        security: [{ bearerAuth: [] }],
+        parameters: [{ name: "id", in: "path", required: true, schema: { type: "integer" }, example: 1 }],
+        requestBody: {
+          required: true,
+          content: { "application/json": { schema: { $ref: "#/components/schemas/OrderPricingInput" } } },
+        },
+        responses: {
+          200: { $ref: "#/components/responses/OrderResponse" },
+          400: { description: "discount / shipping_fee must be non-negative numbers" },
           401: { description: "Missing or invalid token" },
           403: { description: "Forbidden: insufficient role" },
           404: { description: "Order not found" },
@@ -1344,7 +1430,9 @@ module.exports = {
       ProductImageUploadOptional: {
         type: "object",
         properties: {
+          productId: { type: "integer", example: 2, description: "Optional target product ID to move this image to another product" },
           image: { type: "string", format: "binary", description: "Optional new file, replaces the old one" },
+          url: { type: "string", example: "/uploads/products/product-1760514000000-123456789.png", description: "Optional direct image URL when not uploading a new file" },
           is_primary: { type: "boolean", example: false },
         },
       },
@@ -1556,14 +1644,70 @@ module.exports = {
       CheckoutInput: {
         type: "object",
         properties: {
-          addressId: { type: "integer", example: 1, description: "Optional. Defaults to my default address" },
+          addressId: { type: "integer", example: 7, description: "Optional. Defaults to user's default address" },
+          sub_total: { type: "number", example: 120.0, description: "Optional direct subtotal when cart is empty (ignored if cart or items has products)" },
+          discount: { type: "number", example: 10.0, description: "Optional discount amount" },
+          shipping_fee: { type: "number", example: 8.0, description: "Optional shipping fee (alias: shipping). Defaults to SHIPPING_FEE" },
+          items: {
+            type: "array",
+            example: [],
+            description: "Optional items [{ variantId, quantity }] when cart is empty",
+            items: {
+              type: "object",
+              properties: {
+                variantId: { type: "integer", example: 5 },
+                quantity: { type: "integer", example: 1 },
+              },
+            },
+          },
+        },
+      },
+      AdminOrderCreateInput: {
+        type: "object",
+        properties: {
+          userId: { type: "integer", example: 1 },
+          addressId: { type: "integer", example: 1 },
+          order_number: { type: "string", example: "ORD-20261023-A1B2C3" },
+          shipping_receiver_name: { type: "string", example: "Amelia Stone" },
+          shipping_phone: { type: "string", example: "012345678" },
+          shipping_street: { type: "string", example: "#12, Street 310" },
+          shipping_city: { type: "string", example: "Phnom Penh" },
+          sub_total: { type: "number", example: 140.0 },
+          discount: { type: "number", example: 20.0 },
+          shipping_fee: { type: "number", example: 8.0, description: "Shipping fee (alias: shipping)" },
+          total: { type: "number", example: 128.0, description: "Optional; auto-calculated as sub_total - discount + shipping_fee" },
+          status: { type: "string", enum: ["pending", "paid", "shipped", "delivered", "cancelled"], example: "pending" },
+        },
+      },
+      AdminOrderUpdateInput: {
+        type: "object",
+        properties: {
+          sub_total: { type: "number", example: 140.0 },
+          discount: { type: "number", example: 20.0 },
+          shipping_fee: { type: "number", example: 8.0, description: "Shipping fee (alias: shipping)" },
+          status: { type: "string", enum: ["pending", "paid", "shipped", "delivered", "cancelled"], example: "paid" },
+          addressId: { type: "integer", nullable: true, example: 1 },
+          shipping_receiver_name: { type: "string", example: "Amelia Stone" },
+          shipping_phone: { type: "string", example: "012345678" },
+          shipping_street: { type: "string", example: "#12, Street 310" },
+          shipping_city: { type: "string", example: "Phnom Penh" },
+        },
+      },
+      OrderPricingInput: {
+        type: "object",
+        properties: {
+          sub_total: { type: "number", example: 140.0 },
+          discount: { type: "number", example: 20.0 },
+          shipping_fee: { type: "number", example: 8.0, description: "Shipping fee (alias: shipping)" },
         },
       },
       OrderStatusInput: {
         type: "object",
         required: ["status"],
         properties: {
-          status: { type: "string", enum: ["paid", "shipped", "delivered", "cancelled"], example: "paid" },
+          status: { type: "string", enum: ["pending", "paid", "shipped", "delivered", "cancelled"], example: "paid" },
+          discount: { type: "number", example: 0 },
+          shipping_fee: { type: "number", example: 0 },
         },
       },
       OrderItem: {
@@ -1622,6 +1766,9 @@ module.exports = {
           to: { type: "string", example: "2026-10-31" },
           total_orders: { type: "integer", example: 12 },
           paid_orders: { type: "integer", example: 9, description: "paid + shipped + delivered" },
+          sub_total: { type: "number", example: 2520.5 },
+          total_discount: { type: "number", example: 120.0 },
+          total_shipping: { type: "number", example: 50.0 },
           revenue: { type: "number", example: 2450.5 },
           average_order_value: { type: "number", example: 272.28 },
           by_status: {

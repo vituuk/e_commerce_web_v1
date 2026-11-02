@@ -64,4 +64,46 @@ const listAll=async(req,res)=>{
     }
 };
 
-module.exports={checkout,callback,verify,listMine,listAll};
+// POST /payment/admin
+const createAdminPayment=async(req,res)=>{
+    try{
+        const data=await paymentService.createAdminPayment(req.user,req.body || {});
+        return res.status(201).json({message:"Payment created",data});
+    }
+    catch(error){
+        return handleError(res,error,"Create payment");
+    }
+};
+
+// PUT /payment/admin/:id
+const updateAdminPayment=async(req,res)=>{
+    try{
+        const data=await paymentService.updateAdminPayment(req.params.id,req.body || {});
+        return res.status(200).json({message:"Payment updated",data});
+    }
+    catch(error){
+        return handleError(res,error,"Update payment");
+    }
+};
+
+// DELETE /payment/admin/:id
+const removeAdminPayment=async(req,res)=>{
+    try{
+        await paymentService.removeAdminPayment(req.params.id);
+        return res.status(200).json({message:"Payment deleted"});
+    }
+    catch(error){
+        return handleError(res,error,"Delete payment");
+    }
+};
+
+module.exports={
+    checkout,
+    callback,
+    verify,
+    listMine,
+    listAll,
+    createAdminPayment,
+    updateAdminPayment,
+    removeAdminPayment
+};

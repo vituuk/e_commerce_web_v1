@@ -21,10 +21,14 @@ const authenticate = (req, res, next) => {
     }
 };
 
-// Allow only users having at least one of the given roles (e.g. "admin", "user")
+// Allow only users having at least one of the given roles (e.g. "admin", "superadmin", "user")
+// When "admin" is allowed, "superadmin" is also automatically allowed.
 const authorize = (...allowedRoles) => (req, res, next) => {
     const roles = (req.user && req.user.roles) || [];
-    const allowed = allowedRoles.some((role) => roles.includes(role));
+    const effectiveAllowed = allowedRoles.includes("admin") && !allowedRoles.includes("superadmin")
+        ? [...allowedRoles, "superadmin"]
+        : allowedRoles;
+    const allowed = effectiveAllowed.some((role) => roles.includes(role));
     if (!allowed) {
         return res.status(403).json({ message: "Forbidden: insufficient role" });
     }

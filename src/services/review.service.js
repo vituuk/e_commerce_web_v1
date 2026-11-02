@@ -4,6 +4,11 @@ const {paginate}=require("../util/paginate");
 
 const userInclude={model:User,as:"user",attributes:["id","firstName","lastName"]};
 
+const isAdminUser=(user)=>{
+    const roles=(user && user.roles) || [];
+    return roles.includes("admin") || roles.includes("superadmin");
+};
+
 // partial=true for update (only check fields that were sent)
 const validate=(body,partial)=>{
     const {rating,comment}=body;
@@ -67,15 +72,28 @@ const listByProduct=async(productId,query={})=>{
 
 const getOne=async(productId,id)=>findReview(productId,id);
 
-const create=async(userId,productId,body)=>{
+const create=async(user,productId,body)=>{
     await ensureProduct(productId);
     const error=validate(body,false);
     if(error) throw new AppError(400,error);
 
+    const callerId=typeof user==="object" ? user.id : user;
+    let targetUserId=callerId;
+    if(isAdminUser(user) && body.userId){
+        const u=await User.findByPk(body.userId);
+        if(u) targetUserId=u.id;
+    }
+
     try{
-        // userId from token, productId from URL — never from body
+        const existing=await Review.findOne({where:{userId:targetUserId,productId}});
+        if(existing && isAdminUser(user)){
+            existing.rating=Number(body.rating);
+            existing.comment=body.comment ?? null;
+            await existing.save();
+            return findReview(productId,existing.id);
+        }
         const review=await Review.create({
-            userId,
+            userId:targetUserId,
             productId,
             rating:Number(body.rating),
             comment:body.comment ?? null
@@ -88,10 +106,11 @@ const create=async(userId,productId,body)=>{
     }
 };
 
-// only the owner can edit
+// owner or admin/superadmin can edit
 const update=async(user,productId,id,body)=>{
     const review=await findReview(productId,id);
-    if(review.userId!==user.id) throw new AppError(403,"You can only edit your own review");
+    const isAdmin=isAdminUser(user);
+    if(review.userId!==user.id && !isAdmin) throw new AppError(403,"You can only edit your own review");
 
     const error=validate(body,true);
     if(error) throw new AppError(400,error);
@@ -102,10 +121,10 @@ const update=async(user,productId,id,body)=>{
     return review;
 };
 
-// owner or admin can delete
+// owner or admin/superadmin can delete
 const remove=async(user,productId,id)=>{
     const review=await findReview(productId,id);
-    const isAdmin=(user.roles || []).includes("admin");
+    const isAdmin=isAdminUser(user);
     if(review.userId!==user.id && !isAdmin) throw new AppError(403,"You can only delete your own review");
     await review.destroy();
 };

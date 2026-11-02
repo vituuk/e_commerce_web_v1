@@ -1,7 +1,7 @@
 const {Op}=require("sequelize");
 const {Product,Category}=require("../../models");
 const AppError=require("../util/app-error");
-const {getPagination,buildPagination}=require("../util/paginate");
+const {getPagination,buildPagination,parseBool}=require("../util/paginate");
 
 const categoryInclude={model:Category,as:"category",attributes:["id","name","slug"]};
 
@@ -29,7 +29,14 @@ const list=async(query)=>{
     const {page,limit,offset}=getPagination(query);
     const where={};
     if(query.categoryId) where.categoryId=query.categoryId;
-    if(query.q) where.name={[Op.iLike]:`%${query.q}%`};
+    if(query.q){
+        where[Op.or]=[
+            {name:{[Op.iLike]:`%${query.q}%`}},
+            {slug:{[Op.iLike]:`%${query.q}%`}}
+        ];
+    }
+    const active=parseBool(query.is_active);
+    if(active!==undefined) where.is_active=active;
 
     const {rows,count}=await Product.findAndCountAll({
         where,
