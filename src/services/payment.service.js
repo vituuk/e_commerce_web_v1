@@ -64,6 +64,14 @@ const createCheckout=async(user,body)=>{
         price:Number(i.unit_price)
     }))));
 
+    const frontendUrl = process.env.FRONTEND_URL || "http://localhost:5173";
+    const returnUrl = process.env.ABA_PAYWAY_RETURN_URL
+        ? encodeBase64(process.env.ABA_PAYWAY_RETURN_URL)
+        : "";
+    const cancelUrl = process.env.ABA_PAYWAY_CANCEL_URL || `${frontendUrl}/checkout`;
+    const continueSuccessUrl = process.env.ABA_PAYWAY_SUCCESS_URL || `${frontendUrl}/checkout?tranId=${tran_id}`;
+    const cleanPhone = String(order.shipping_phone || "012345678").replace(/\s+/g, "");
+
     // every field in the hash must be sent exactly as hashed (empty string if unused)
     const fields={
         req_time:getReqTime(),
@@ -72,20 +80,40 @@ const createCheckout=async(user,body)=>{
         amount:money(order.total),
         items,
         shipping:money(order.shipping_fee),
-        firstname:dbUser?.firstName || "",
-        lastname:dbUser?.lastName || "",
-        email:dbUser?.email || "",
-        phone:order.shipping_phone || "",
+        firstname:dbUser?.firstName || "Customer",
+        lastname:dbUser?.lastName || "Buyer",
+        email:dbUser?.email || process.env.ABA_PAYWAY_MERCHANT_EMAIL || "customer@example.com",
+        phone:cleanPhone,
         type:"purchase",
         payment_option,
-        return_url:process.env.ABA_PAYWAY_RETURN_URL ? encodeBase64(process.env.ABA_PAYWAY_RETURN_URL) : "",
-        cancel_url:process.env.ABA_PAYWAY_CANCEL_URL || (process.env.FRONTEND_URL ? `${process.env.FRONTEND_URL}/checkout/cancel?orderId=${order.id}` : ""),
-        continue_success_url:process.env.ABA_PAYWAY_SUCCESS_URL || (process.env.FRONTEND_URL ? `${process.env.FRONTEND_URL}/checkout/success?tranId=${tran_id}` : ""),
+        return_url:returnUrl,
+        cancel_url:cancelUrl,
+        continue_success_url:continueSuccessUrl,
         currency:"USD"
     };
     fields.hash=buildPurchaseHash(fields);
 
-    return {payment,action_url:PURCHASE_URL,method:"POST",fields};
+    // Required by AbaPayway checkout popup modal (not part of the HMAC hash)
+    fields.view_type = "popup";
+    fields.payment_gate = 0;
+
+    const payway = {
+        action: PURCHASE_URL,
+        method: "POST",
+        target: "aba_webservice",
+        id: "aba_merchant_request",
+        fields
+    };
+
+    return {
+        payment,
+        action_url: PURCHASE_URL,
+        method: "POST",
+        target: "aba_webservice",
+        id: "aba_merchant_request",
+        fields,
+        payway
+    };
 };
 
 // ask PayWay for the real status (never trust the callback body alone)
