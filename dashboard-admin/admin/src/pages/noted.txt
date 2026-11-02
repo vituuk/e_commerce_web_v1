@@ -1,0 +1,13 @@
+CommerceOS Admin Dashboard Pages
+-----------------------------------
+- Dashboard.tsx    : Main KPI overview & charts
+- HomePage.tsx     : Home landing view
+- Product.tsx      : Product catalog & inventory
+- Category.tsx     : Product collections & categories
+- Customer.tsx     : Customer directory & purchasing info
+- Orders.tsx       : Order tracking & fulfillment
+- Payments.tsx     : Payment methods & transaction logs
+- PosPage.tsx      : Point of Sale cashier register
+- Settings.tsx     : Store preferences & configuration
+- LoginPage.tsx    : User authentication portal
+- test-category.tsx: Test environment for category workflows

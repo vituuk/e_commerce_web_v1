@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 80" width="80" height="80">
+  <defs>
+    <clipPath id="avatar-circle">
+      <circle cx="40" cy="40" r="38" />
+    </clipPath>
+    <linearGradient id="head-grad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#f0f2f4" />
+      <stop offset="100%" stop-color="#dcdfe3" />
+    </linearGradient>
+  </defs>
+  <circle cx="40" cy="40" r="39" fill="#ffffff" stroke="#e2e8f0" stroke-width="1.5" />
+  <g clip-path="url(#avatar-circle)">
+    <!-- Shoulders / Shirt -->
+    <path d="M12,78 C14,62 25,57 40,57 C55,57 66,62 68,78 Z" fill="#b0b5ba" />
+    <!-- Neck -->
+    <path d="M33,47 L33,59 C33,62 47,62 47,59 L47,47 Z" fill="#dcdedf" />
+    <!-- Neck shadow -->
+    <path d="M33,48 Q40,54 47,48 L47,53 Q40,57 33,53 Z" fill="#c8cbce" />
+    <!-- Ears -->
+    <ellipse cx="25.5" cy="36.5" rx="2.8" ry="4.5" fill="#e2e4e7" />
+    <ellipse cx="54.5" cy="36.5" rx="2.8" ry="4.5" fill="#e2e4e7" />
+    <!-- Head / Face -->
+    <path d="M26,31 C26,20 54,20 54,31 C54,43 48,51 40,51 C32,51 26,43 26,31 Z" fill="url(#head-grad)" />
+    <!-- Hair silhouette (matching screenshot's classic parted style) -->
+    <path d="M25.5,35 C24,26 27,17 37,16.5 C40,16.2 44,17 47,18 C52,19.5 55.5,25 54.5,35 C53.8,31 53,27 50.5,25 C47,25.5 42,24 36,24.5 C30,25 27.5,29 25.5,35 Z" fill="#b0b5ba" />
+  </g>
+</svg>
+

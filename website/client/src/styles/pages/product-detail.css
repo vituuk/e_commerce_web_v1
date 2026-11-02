@@ -1,0 +1,574 @@
+/* ---------- PAGE 3: PRODUCT DETAILS ---------- */
+.nx-page-product {
+  padding-top: 24px;
+}
+
+.nx-detail-back-btn {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  color: #18181b;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  flex-shrink: 0;
+  margin-right: 14px;
+  margin-top: 0;
+  padding: 0;
+}
+
+.nx-detail-back-btn:hover {
+  background: #f8fafc;
+  border-color: #cbd5e1;
+  color: #000000;
+  transform: scale(1.06);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.12);
+}
+
+.nx-detail-back-btn:active {
+  transform: scale(0.96);
+}
+
+/* ==========================================================================
+   PAGE 3: PRODUCT DETAILS PAGE (Modern Minimalist Layout from Reference Image 2 & 3)
+   ========================================================================== */
+.nx-product-detail-layout {
+  display: grid;
+  grid-template-columns: minmax(500px, 780px) 1fr;
+  gap: 52px;
+  align-items: start;
+  margin-top: 8px;
+  margin-bottom: 72px;
+}
+
+/* Gallery Container (Back button on the far left, Thumbnails in the middle, Main image on the right) */
+.nx-detail-gallery {
+  width: 100%;
+  max-width: 780px;
+}
+
+.nx-detail-gallery-container {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  gap: 16px;
+  width: 100%;
+}
+
+/* Vertical Thumbnails on the Left */
+.nx-detail-thumbs {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 88px;
+  flex-shrink: 0;
+  margin-top: 0;
+}
+
+.nx-thumb-btn {
+  width: 88px;
+  height: 106px;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 2px solid transparent;
+  padding: 0;
+  cursor: pointer;
+  background: #f3f4f6;
+  transition: all 0.15s ease;
+  flex-shrink: 0;
+}
+
+.nx-thumb-btn:hover {
+  opacity: 0.85;
+}
+
+.nx-thumb-btn.active {
+  border-color: #111827;
+}
+
+.nx-thumb-btn img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* Main Image Container & Smooth Hover Magnifier */
+.nx-detail-main-img-wrap {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+  aspect-ratio: 1 / 1.25;
+  max-height: 750px;
+  border-radius: 12px;
+  overflow: hidden;
+  background: #f9fafb;
+  cursor: crosshair;
+}
+
+.nx-detail-main-img {
+  width: 100%;
+  height: 100%;
+  display: block;
+  overflow: hidden;
+  position: relative;
+}
+
+.nx-detail-main-img img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  user-select: none;
+  pointer-events: none;
+  will-change: transform, transform-origin;
+}
+
+/* Floating Navigation Arrows on Main Image */
+.nx-gallery-arrow-btn {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: #ffffff;
+  color: #111827;
+  border: none;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.16);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 4;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.nx-gallery-arrow-btn:hover {
+  background: #ffffff;
+  transform: translateY(-50%) scale(1.08);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.22);
+}
+
+.nx-gallery-arrow-btn.prev {
+  left: 14px;
+}
+
+.nx-gallery-arrow-btn.next {
+  right: 14px;
+}
+
+/* Right Column: Minimal Product Info */
+.nx-detail-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.nx-detail-title {
+  font-size: 30px;
+  font-weight: 700;
+  color: #111827;
+  margin: 0 0 10px 0;
+  letter-spacing: -0.015em;
+  line-height: 1.25;
+}
+
+.nx-detail-rating-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 16px;
+}
+
+.nx-stars {
+  display: inline-flex;
+  gap: 2px;
+}
+
+.nx-rating-score {
+  font-size: 13.5px;
+  font-weight: 500;
+  color: #4b5563;
+}
+
+.nx-detail-price-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.nx-detail-price {
+  font-size: 28px;
+  font-weight: 700;
+  color: #111827;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+}
+
+.nx-detail-original-price {
+  font-size: 18px;
+  font-weight: 500;
+  color: #94a3b8;
+  text-decoration: line-through;
+  line-height: 1.1;
+}
+
+.nx-detail-discount-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: #e11d48;
+  color: #ffffff;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.03em;
+  padding: 4px 9px;
+  border-radius: 4px;
+  line-height: 1;
+}
+
+.nx-detail-divider {
+  width: 100%;
+  height: 1px;
+  background: #e5e7eb;
+  margin-bottom: 20px;
+}
+
+.nx-detail-section-group {
+  margin-bottom: 20px;
+}
+
+.nx-detail-opt-label {
+  font-size: 14px;
+  font-weight: 600;
+  color: #111827;
+  margin-bottom: 12px;
+}
+
+.nx-detail-opt-label .nx-color-name {
+  font-weight: 400;
+  color: #6b7280;
+}
+
+/* Available Size Tiles matching reference */
+.nx-size-tiles-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.nx-size-tile {
+  min-width: 54px;
+  height: 44px;
+  padding: 0 14px;
+  border-radius: 4px;
+  border: 1.5px solid #e5e7eb;
+  background: #f4f4f5;
+  color: #18181b;
+  font-size: 14.5px;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s ease;
+}
+
+.nx-size-tile:hover {
+  background: #e4e4e7;
+  border-color: #d4d4d8;
+}
+
+.nx-size-tile.active {
+  background: #111827;
+  border-color: #111827;
+  color: #ffffff;
+}
+
+/* Available Color Swatches */
+.nx-color-swatches-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+}
+
+.nx-detail-color-swatch {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  border: 1px solid rgba(0, 0, 0, 0.15);
+  cursor: pointer;
+  padding: 0;
+  position: relative;
+  transition: all 0.2s ease;
+}
+
+.nx-detail-color-swatch:hover {
+  transform: scale(1.1);
+}
+
+.nx-detail-color-swatch.active {
+  box-shadow: 0 0 0 2px #ffffff, 0 0 0 4px #111827;
+}
+
+/* Action Row (Add to Cart + Heart Wishlist Button on Right) */
+.nx-detail-action-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 20px;
+  margin-bottom: 26px;
+}
+
+.nx-detail-add-btn {
+  height: 48px;
+  padding: 0 42px;
+  border-radius: 4px;
+  background: #111827;
+  color: #ffffff;
+  border: none;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s ease, transform 0.15s ease;
+  letter-spacing: 0.03em;
+}
+
+.nx-detail-add-btn:hover:not(:disabled) {
+  background: #1f2937;
+  transform: translateY(-1px);
+}
+
+.nx-detail-add-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+
+.nx-detail-heart-btn {
+  width: 48px;
+  height: 48px;
+  border-radius: 2px;
+  border: 1.5px solid #e5e7eb;
+  background: #ffffff;
+  color: #111827;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  padding: 0;
+  flex-shrink: 0;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.nx-detail-heart-btn:hover {
+  border-color: #111827;
+  background: #f8fafc;
+  transform: translateY(-1px);
+}
+
+.nx-detail-heart-btn.active {
+  border-color: #fecdd3;
+  background: #fff1f2;
+  color: #e11d48;
+}
+
+.nx-detail-heart-btn:active .nx-detail-heart-svg {
+  transform: scale(0.86);
+}
+
+.nx-detail-heart-svg {
+  display: block;
+  transition: transform 0.15s ease;
+}
+
+@media (max-width: 1180px) {
+  .nx-product-detail-layout {
+    grid-template-columns: minmax(440px, 560px) 1fr;
+    gap: 40px;
+  }
+  .nx-detail-gallery {
+    max-width: 560px;
+  }
+  .nx-detail-main-img-wrap {
+    max-height: 620px;
+  }
+}
+
+@media (max-width: 880px) {
+  .nx-product-detail-layout {
+    grid-template-columns: 1fr;
+    gap: 36px;
+  }
+  .nx-detail-gallery {
+    max-width: 100%;
+  }
+  .nx-detail-main-img-wrap {
+    max-height: 600px;
+  }
+}
+
+@media (max-width: 540px) {
+  .nx-detail-gallery-container {
+    flex-direction: column;
+    gap: 12px;
+  }
+  .nx-detail-gallery-container .nx-detail-back-btn {
+    margin-right: 0;
+    margin-bottom: 6px;
+    align-self: flex-start;
+  }
+  .nx-detail-thumbs {
+    flex-direction: row;
+    width: 100%;
+    overflow-x: auto;
+    order: 3;
+  }
+  .nx-detail-main-img-wrap {
+    order: 2;
+    width: 100%;
+  }
+  .nx-thumb-btn {
+    width: 72px;
+    height: 84px;
+  }
+}
+
+/* Editorial Description Block */
+.nx-detail-desc-card {
+  border-top: 1px solid #f0f0f0;
+  padding-top: 20px;
+}
+
+.nx-detail-desc-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #111827;
+  margin-bottom: 8px;
+}
+
+.nx-detail-desc-p {
+  font-size: 14px;
+  line-height: 1.65;
+  color: #4b5563;
+  margin: 0 0 14px 0;
+}
+
+.nx-detail-bullet-points {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.nx-bullet-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: #6b7280;
+}
+
+.nx-bullet-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: #9ca3af;
+  flex-shrink: 0;
+}
+
+/* Reviews Section */
+.nx-reviews-section {
+  margin-top: 28px;
+  margin-bottom: 36px;
+}
+
+.nx-reviews-grid {
+  display: grid;
+  grid-template-columns: 380px 1fr;
+  gap: 28px;
+  align-items: start;
+}
+
+.nx-review-form-card,
+.nx-review-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 2px;
+  padding: 22px;
+}
+
+.nx-review-form-card h3 {
+  margin: 0 0 6px;
+}
+
+.nx-star-picker {
+  display: flex;
+  gap: 4px;
+}
+
+.nx-star-picker button {
+  background: none;
+  border: none;
+  padding: 2px;
+  cursor: pointer;
+}
+
+.nx-reviews-list {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.nx-review-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.nx-review-date {
+  font-size: 12px;
+  color: #64748b;
+  margin-left: 10px;
+}
+
+.nx-review-comment {
+  margin: 0;
+  color: #334155;
+  line-height: 1.55;
+}
+
+.nx-review-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 10px;
+}
+
+.nx-review-actions button {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: none;
+  border: none;
+  padding: 0;
+  font-size: 12px;
+  font-weight: 600;
+  color: #0f172a;
+  cursor: pointer;
+}
+
+.nx-review-actions button.danger {
+  color: #dc2626;
+}
+

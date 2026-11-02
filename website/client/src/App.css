@@ -1,0 +1,9 @@
+/* App-level supplementary styles (modular feature styles live in ./styles/) */
+@import './styles/components/skeleton.css';
+
+.main-storefront-shell {
+  width: 100%;
+  min-height: 100vh;
+  background: var(--sh-bg);
+  color: var(--sh-text);
+}

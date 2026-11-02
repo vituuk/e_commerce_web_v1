@@ -1,0 +1,29 @@
+@font-face {
+  font-family: "Inter Tight";
+  src: url("./InterTight-Variable.woff2") format("woff2");
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Noto Sans Khmer";
+  src: url("./NotoSansKhmer-Variable.woff2") format("woff2");
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+.inter-tight {
+  font-family: "Inter Tight", "Noto Sans Khmer", sans-serif;
+  font-optical-sizing: auto;
+  font-style: normal;
+}
+
+.noto-sans-khmer {
+  font-family: "Noto Sans Khmer", "Inter Tight", sans-serif;
+  font-optical-sizing: auto;
+  font-style: normal;
+  font-variation-settings: "wdth" 100;
+}
+
