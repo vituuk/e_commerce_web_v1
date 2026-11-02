@@ -20,6 +20,17 @@ const list=async(req,res)=>{
     }
 };
 
+// GET /address/admin
+const listAll=async(req,res)=>{
+    try{
+        const {rows,pagination}=await addressService.listAll(req.query);
+        return res.status(200).json({message:"All addresses",data:rows,pagination});
+    }
+    catch(error){
+        return handleError(res,error,"Get all addresses");
+    }
+};
+
 // GET /address/default
 const getDefault=async(req,res)=>{
     try{
@@ -34,7 +45,7 @@ const getDefault=async(req,res)=>{
 // GET /address/:id
 const getOne=async(req,res)=>{
     try{
-        const data=await addressService.getOne(req.user.id,req.params.id);
+        const data=await addressService.getOne(req.user,req.params.id);
         return res.status(200).json({message:"Address",data});
     }
     catch(error){
@@ -45,7 +56,7 @@ const getOne=async(req,res)=>{
 // POST /address
 const create=async(req,res)=>{
     try{
-        const data=await addressService.create(req.user.id,req.body || {});
+        const data=await addressService.create(req.user,req.body || {});
         return res.status(201).json({message:"Address created",data});
     }
     catch(error){
@@ -56,7 +67,7 @@ const create=async(req,res)=>{
 // PUT /address/:id
 const update=async(req,res)=>{
     try{
-        const data=await addressService.update(req.user.id,req.params.id,req.body || {});
+        const data=await addressService.update(req.user,req.params.id,req.body || {});
         return res.status(200).json({message:"Address updated",data});
     }
     catch(error){
@@ -67,7 +78,7 @@ const update=async(req,res)=>{
 // PATCH /address/:id/default
 const setDefault=async(req,res)=>{
     try{
-        const data=await addressService.setDefault(req.user.id,req.params.id);
+        const data=await addressService.setDefault(req.user,req.params.id);
         return res.status(200).json({message:"Default address set",data});
     }
     catch(error){
@@ -78,7 +89,7 @@ const setDefault=async(req,res)=>{
 // DELETE /address/:id
 const remove=async(req,res)=>{
     try{
-        await addressService.remove(req.user.id,req.params.id);
+        await addressService.remove(req.user,req.params.id);
         return res.status(200).json({message:"Address deleted"});
     }
     catch(error){
@@ -86,4 +97,4 @@ const remove=async(req,res)=>{
     }
 };
 
-module.exports={list,getDefault,getOne,create,update,setDefault,remove};
+module.exports={list,listAll,getDefault,getOne,create,update,setDefault,remove};

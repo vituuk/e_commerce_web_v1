@@ -4,7 +4,7 @@ const PizZip=require("pizzip");
 const Docxtemplater=require("docxtemplater");
 const ExcelJS=require("exceljs");
 const {Op,fn,col,literal}=require("sequelize");
-const {Order,OrderItem,Payment,User,sequelize}=require("../../models");
+const {Order,OrderItem,Payment,User}=require("../../models");
 const AppError=require("../util/app-error");
 
 const TEMPLATE_DIR=path.join(__dirname,"..","template");
@@ -15,9 +15,10 @@ const fmtDate=(d)=>d ? new Date(d).toISOString().slice(0,10) : "";
 
 // ================= INVOICE (.docx) =================
 
-// owner can download own invoice; admin can download any
+// owner can download own invoice; admin/superadmin can download any
 const loadOrderForInvoice=async(user,id)=>{
-    const isAdmin=(user.roles || []).includes("admin");
+    const roles=(user && user.roles) || [];
+    const isAdmin=roles.includes("admin") || roles.includes("superadmin");
     const where=isAdmin ? {id} : {id,userId:user.id};
     const order=await Order.findOne({
         where,
@@ -111,22 +112,37 @@ const parseRange=(query)=>{
 const buildReport=async(query)=>{
     const {from,to}=parseRange(query);
     const inRange={createdAt:{[Op.between]:[from,to]}};
-    const REVENUE_STATUSES=["paid","shipped","delivered"]; // money actually received
+    const PAID_STATUSES=["paid","shipped","delivered"];
+    const ACTIVE_STATUSES=["pending","paid","shipped","delivered"];
 
     const byStatusRows=await Order.findAll({
         where:inRange,
-        attributes:["status",[fn("COUNT",col("id")),"count"],[fn("SUM",col("total")),"total"]],
+        attributes:[
+            "status",
+            [fn("COUNT",col("id")),"count"],
+            [fn("SUM",col("sub_total")),"sub_total"],
+            [fn("SUM",col("discount")),"discount"],
+            [fn("SUM",col("shipping_fee")),"shipping_fee"],
+            [fn("SUM",col("total")),"total"]
+        ],
         group:["status"],
         raw:true
     });
     const by_status={pending:0,paid:0,shipped:0,delivered:0,cancelled:0};
-    let total_orders=0,revenue=0;
+    let total_orders=0,active_orders=0,sub_total_sum=0,total_discount=0,total_shipping=0,revenue=0;
     byStatusRows.forEach(r=>{
-        by_status[r.status]=Number(r.count);
-        total_orders+=Number(r.count);
-        if(REVENUE_STATUSES.includes(r.status)) revenue+=Number(r.total || 0);
+        const cnt=Number(r.count || 0);
+        by_status[r.status]=cnt;
+        total_orders+=cnt;
+        if(ACTIVE_STATUSES.includes(r.status)){
+            active_orders+=cnt;
+            sub_total_sum+=Number(r.sub_total || 0);
+            total_discount+=Number(r.discount || 0);
+            total_shipping+=Number(r.shipping_fee || 0);
+            revenue+=Number(r.total || 0);
+        }
     });
-    const paid_orders=REVENUE_STATUSES.reduce((s,k)=>s+by_status[k],0);
+    const paid_orders=PAID_STATUSES.reduce((s,k)=>s+by_status[k],0);
 
     const top_products=await OrderItem.findAll({
         attributes:[
@@ -134,7 +150,7 @@ const buildReport=async(query)=>{
             [fn("SUM",col("quantity")),"quantity"],
             [fn("SUM",col("amount")),"revenue"]
         ],
-        include:[{model:Order,as:"order",attributes:[],where:{...inRange,status:REVENUE_STATUSES}}],
+        include:[{model:Order,as:"order",attributes:[],where:{...inRange,status:ACTIVE_STATUSES}}],
         group:["product_name"],
         order:[[literal('SUM("quantity")'),"DESC"]],
         limit:10,
@@ -142,7 +158,7 @@ const buildReport=async(query)=>{
     });
 
     const daily=await Order.findAll({
-        where:{...inRange,status:REVENUE_STATUSES},
+        where:{...inRange,status:ACTIVE_STATUSES},
         attributes:[
             [fn("DATE",col("createdAt")),"date"],
             [fn("COUNT",col("id")),"orders"],
@@ -158,8 +174,11 @@ const buildReport=async(query)=>{
         to:fmtDate(to),
         total_orders,
         paid_orders,
+        sub_total:Number(money(sub_total_sum)),
+        total_discount:Number(money(total_discount)),
+        total_shipping:Number(money(total_shipping)),
         revenue:Number(money(revenue)),
-        average_order_value:paid_orders ? Number(money(revenue/paid_orders)) : 0,
+        average_order_value:active_orders ? Number(money(revenue/active_orders)) : 0,
         by_status,
         top_products:top_products.map(p=>({product_name:p.product_name,quantity:Number(p.quantity),revenue:Number(money(p.revenue))})),
         daily:daily.map(d=>({date:fmtDate(d.date),orders:Number(d.orders),revenue:Number(money(d.revenue))}))
@@ -189,6 +208,9 @@ const buildReportExcel=async(query)=>{
     s.addRow([]);
     s.addRow(["Total orders",report.total_orders]);
     s.addRow(["Paid orders",report.paid_orders]);
+    s.addRow(["Subtotal (USD)",report.sub_total]);
+    s.addRow(["Total discount (USD)",report.total_discount]);
+    s.addRow(["Total shipping (USD)",report.total_shipping]);
     s.addRow(["Revenue (USD)",report.revenue]);
     s.addRow(["Average order value",report.average_order_value]);
     s.addRow([]);

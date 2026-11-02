@@ -31,10 +31,10 @@ const getOne=async(req,res)=>{
     }
 };
 
-// POST /product/:productId/reviews   body: {rating, comment}
+// POST /product/:productId/reviews   body: {rating, comment, userId?}
 const create=async(req,res)=>{
     try{
-        const data=await reviewService.create(req.user.id,req.params.productId,req.body || {});
+        const data=await reviewService.create(req.user,req.params.productId,req.body || {});
         return res.status(201).json({message:"Review created",data});
     }
     catch(error){

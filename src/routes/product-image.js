@@ -4,7 +4,7 @@ const {authenticate,authorize}=require("../middleware/middleware");
 const {handleUpload,deleteUploadedFile}=require("../middleware/upload");
 
 // multipart sends booleans as strings
-const toBool=(v)=>v===true || v==="true" || v==="1";
+const toBool=(v)=>v===true || v==="true" || v==="1" || v==="yes";
 const fileUrl=(file)=>`/uploads/products/${file.filename}`;
 
 // mergeParams so :productId from the parent mount is available
@@ -16,7 +16,7 @@ router.get("/",async(req,res)=>{
         const product=await Product.findByPk(req.params.productId,{
             attributes:["id","name","slug"],
             include:[{model:ProductImage,as:"images",attributes:{exclude:["productId"]}}],
-            order:[[{model:ProductImage,as:"images"},"is_primary","ASC"],[{model:ProductImage,as:"images"},"id","ASC"]]
+            order:[[{model:ProductImage,as:"images"},"is_primary","DESC"],[{model:ProductImage,as:"images"},"id","ASC"]]
         });
         if(!product){
             return res.status(404).json({message:"Product not found"});
@@ -47,18 +47,20 @@ router.get("/:id",async(req,res)=>{
     }
 });
 
-// POST /product/:productId/images : admin only, multipart/form-data { image: file, is_primary? }
+// POST /product/:productId/images : admin only, multipart/form-data { image: file, url?, is_primary? }
 router.post("/",authenticate,authorize("admin"),handleUpload,async(req,res)=>{
-    if(!req.file){
-        return res.status(400).json({message:"image file is required (form field 'image')"});
+    const uploadedUrl=req.file ? fileUrl(req.file) : null;
+    const directUrl=req.body?.url ? String(req.body.url).trim() : null;
+    const url=uploadedUrl || directUrl;
+    if(!url){
+        return res.status(400).json({message:"image file or url is required"});
     }
-    const url=fileUrl(req.file);
     const t=await sequelize.transaction();
     try{
         const product=await Product.findByPk(req.params.productId,{transaction:t});
         if(!product){
             await t.rollback();
-            deleteUploadedFile(url);
+            if(uploadedUrl) deleteUploadedFile(uploadedUrl);
             return res.status(404).json({message:"Product not found"});
         }
 
@@ -71,50 +73,98 @@ router.post("/",authenticate,authorize("admin"),handleUpload,async(req,res)=>{
             await ProductImage.update({is_primary:false},{where:{productId:product.id},transaction:t});
         }
 
-        // productId comes from the URL, never from the body
         const image=await ProductImage.create({productId:product.id,url,is_primary:primary},{transaction:t});
         await t.commit();
         return res.status(201).json({message:"Image created",data:image});
     }
     catch(error){
         await t.rollback();
-        deleteUploadedFile(url);
+        if(uploadedUrl) deleteUploadedFile(uploadedUrl);
         console.log("Create product image error",error);
         return res.status(500).json({message:"Create product image failed"});
     }
 });
 
-// PUT /product/:productId/images/:id : admin only, multipart/form-data { image?: file, is_primary? }
+// PUT /product/:productId/images/:id : admin only, multipart/form-data { productId?, image?: file, url?, is_primary? }
 router.put("/:id",authenticate,authorize("admin"),handleUpload,async(req,res)=>{
-    const newUrl=req.file ? fileUrl(req.file) : null;
+    const newUrl=req.file ? fileUrl(req.file) : (req.body?.url ? String(req.body.url).trim() : null);
+    const rawProductId=req.body?.productId ?? req.body?.product_id;
     const t=await sequelize.transaction();
     try{
-        const image=await ProductImage.findOne({
+        let image=await ProductImage.findOne({
             where:{id:req.params.id,productId:req.params.productId},
             transaction:t
         });
+        if(!image && rawProductId!==undefined && String(rawProductId).trim()===String(req.params.productId)){
+            image=await ProductImage.findByPk(req.params.id,{transaction:t});
+        }
         if(!image){
             await t.rollback();
-            deleteUploadedFile(newUrl);
+            if(req.file) deleteUploadedFile(newUrl);
             return res.status(404).json({message:"Image not found"});
+        }
+
+        const oldProductId=Number(image.productId);
+        const wasPrimaryOnOld=Boolean(image.is_primary);
+        let targetProductId=oldProductId;
+
+        if(rawProductId!==undefined && String(rawProductId).trim()!==""){
+            const parsedProductId=Number(rawProductId);
+            if(!Number.isInteger(parsedProductId) || parsedProductId<=0){
+                await t.rollback();
+                if(req.file) deleteUploadedFile(newUrl);
+                return res.status(400).json({message:"Invalid productId"});
+            }
+            if(parsedProductId!==oldProductId){
+                const targetProduct=await Product.findByPk(parsedProductId,{transaction:t});
+                if(!targetProduct){
+                    await t.rollback();
+                    if(req.file) deleteUploadedFile(newUrl);
+                    return res.status(404).json({message:"Product not found"});
+                }
+                targetProductId=targetProduct.id;
+                image.productId=targetProductId;
+            }
         }
 
         const oldUrl=image.url;
         if(newUrl) image.url=newUrl;
-        if(toBool(req.body?.is_primary)){
-            await ProductImage.update({is_primary:false},{where:{productId:image.productId},transaction:t});
-            image.is_primary=true;
+
+        if(req.body?.is_primary!==undefined && String(req.body.is_primary).trim()!==""){
+            if(toBool(req.body.is_primary)){
+                await ProductImage.update({is_primary:false},{where:{productId:targetProductId},transaction:t});
+                image.is_primary=true;
+            } else {
+                image.is_primary=false;
+            }
+        } else if(targetProductId!==oldProductId){
+            if(image.is_primary){
+                await ProductImage.update({is_primary:false},{where:{productId:targetProductId},transaction:t});
+            } else {
+                const targetCount=await ProductImage.count({where:{productId:targetProductId},transaction:t});
+                if(targetCount===0) image.is_primary=true;
+            }
         }
+
         await image.save({transaction:t});
+
+        // promote another image on the old product if its primary image was moved
+        if(targetProductId!==oldProductId && wasPrimaryOnOld){
+            const next=await ProductImage.findOne({where:{productId:oldProductId},order:[["id","ASC"]],transaction:t});
+            if(next){
+                next.is_primary=true;
+                await next.save({transaction:t});
+            }
+        }
+
         await t.commit();
 
-        // remove the replaced file only after the DB change succeeded
-        if(newUrl) deleteUploadedFile(oldUrl);
+        if(req.file && oldUrl && oldUrl!==newUrl) deleteUploadedFile(oldUrl);
         return res.status(200).json({message:"Image updated",data:image});
     }
     catch(error){
         await t.rollback();
-        deleteUploadedFile(newUrl);
+        if(req.file) deleteUploadedFile(newUrl);
         console.log("Update product image error",error);
         return res.status(500).json({message:"Update product image failed"});
     }

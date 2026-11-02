@@ -28,6 +28,8 @@ app.use("/auth", authRoutes);
 app.use("/auth", userProfileRoutes);
 app.use("/role", require("./src/routes/role"));
 app.use("/user-role", require("./src/routes/user-role"));
+app.use("/telegram", require("./src/routes/telegram"));
+app.use("/email", require("./src/routes/email"));
 //connect with neon 
 const sequelize = new Sequelize(process.env.DATABASE_URL,{ 
     dialect: "postgres",
@@ -47,6 +49,9 @@ async function startServer() {
     
     // Sync database models (creates tables if they don't exist)
     await sequelize.sync();
+    await sequelize.query('ALTER TABLE "UserProfiles" ALTER COLUMN "avatar" TYPE TEXT;').catch(() => {});
+    await sequelize.query('ALTER TABLE "Orders" ADD COLUMN IF NOT EXISTS "discount" DECIMAL(10,2) NOT NULL DEFAULT 0;').catch(() => {});
+    await sequelize.query('ALTER TABLE "Orders" ADD COLUMN IF NOT EXISTS "shipping_fee" DECIMAL(10,2) NOT NULL DEFAULT 0;').catch(() => {});
 
     app.listen(PORT, () => {
       console.log(`Server is running on http://localhost:${PORT}`);
@@ -60,7 +65,4 @@ app.get("/testing",(req,res)=>{
     res.json({message:"Hello from the server!"});
 });
 
-
-
 startServer();
-

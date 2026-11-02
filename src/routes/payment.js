@@ -9,6 +9,9 @@ router.post("/callback",express.urlencoded({extended:true}),controller.callback)
 
 // admin
 router.get("/admin",authenticate,authorize("admin"),controller.listAll);
+router.post("/admin",authenticate,authorize("admin"),controller.createAdminPayment);
+router.put("/admin/:id",authenticate,authorize("admin"),controller.updateAdminPayment);
+router.delete("/admin/:id",authenticate,authorize("admin"),controller.removeAdminPayment);
 
 // customer
 router.post("/checkout",authenticate,controller.checkout);
