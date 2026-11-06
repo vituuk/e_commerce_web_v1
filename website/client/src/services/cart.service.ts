@@ -12,16 +12,16 @@ function normalizeCart(raw?: Cart | null): Cart {
   if (!raw) return EMPTY_CART
   const items: CartItem[] = (raw.items || []).map((item) => {
     const v = item.variant
-    const unitPrice = Number(
-      item.unit_price ??
-        (v && v.price !== null && v.price !== undefined
-          ? v.price
-          : v?.product?.base_price ?? 0),
-    )
-    const qty = Math.max(1, Number(item.quantity || 1))
-    const lineTotal = Number(
-      item.line_total !== undefined ? item.line_total : (unitPrice * qty).toFixed(2),
-    )
+    const candidatePrice =
+      item.unit_price !== undefined && item.unit_price !== null && !isNaN(Number(item.unit_price)) && Number(item.unit_price) > 0
+        ? Number(item.unit_price)
+        : v && v.price !== null && v.price !== undefined && !isNaN(Number(v.price)) && Number(v.price) > 0
+        ? Number(v.price)
+        : Number(v?.product?.base_price ?? 0)
+    const unitPrice = Number(candidatePrice.toFixed(2))
+    const qty = Math.max(1, Math.floor(Number(item.quantity || 1)))
+    // Authoritatively recalculate line_total = unitPrice * qty
+    const lineTotal = Number((unitPrice * qty).toFixed(2))
     return {
       ...item,
       quantity: qty,
@@ -78,18 +78,20 @@ export const addCartItem = async (payload: AddCartItemPayload): Promise<Cart> =>
     (item) => Number(item.variantId || item.variant?.id) === variantId,
   )
 
-  let newItems = [...current.items]
+  const newItems = [...current.items]
   if (existingIndex >= 0) {
     const existing = newItems[existingIndex]
     const updatedQty = existing.quantity + addQty
+    const unitPrice = Number(existing.unit_price || existing.variant?.price || existing.variant?.product?.base_price || 0)
     newItems[existingIndex] = {
       ...existing,
       quantity: updatedQty,
+      line_total: Number((unitPrice * updatedQty).toFixed(2)),
       variant: payload.variant ? { ...existing.variant, ...payload.variant } : existing.variant,
     }
   } else {
     const v = payload.variant
-    const p = payload.product //v?.product
+    const p = payload.product
     const unitPrice = Number(
       v && v.price !== null && v.price !== undefined
         ? v.price
@@ -100,6 +102,7 @@ export const addCartItem = async (payload: AddCartItemPayload): Promise<Cart> =>
       variantId,
       quantity: addQty,
       unit_price: unitPrice,
+      line_total: Number((unitPrice * addQty).toFixed(2)),
       variant: v
         ? {
             ...v,
@@ -126,7 +129,15 @@ export const updateCartItem = async (
   const newQty = Math.max(1, Math.floor(Number(payload.quantity)))
   const newItems = current.items.map((item) => {
     if (String(item.id) === String(itemId) || String(item.variantId) === String(itemId)) {
-      return { ...item, quantity: newQty }
+      const unitPrice = Number(
+        item.unit_price || item.variant?.price || item.variant?.product?.base_price || 0,
+      )
+      return {
+        ...item,
+        quantity: newQty,
+        unit_price: unitPrice,
+        line_total: Number((unitPrice * newQty).toFixed(2)),
+      }
     }
     return item
   })

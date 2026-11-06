@@ -19,6 +19,7 @@ export interface PaywayModalProps {
  */
 export function PaywayModal({
   order,
+  initialPaymentOption,
   onClose,
   onPaymentSuccess,
   onPaymentUpdated,
@@ -28,13 +29,14 @@ export function PaywayModal({
     if (!order?.id) return
     void openAbaPaywayKhqrPopup({
       order,
+      paymentOption: initialPaymentOption,
       onPaymentSuccess,
       onPaymentUpdated,
       showToast,
     }).finally(() => {
       onClose()
     })
-  }, [order?.id])
+  }, [order?.id, initialPaymentOption])
 
   return null
 }

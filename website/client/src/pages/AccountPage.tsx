@@ -13,7 +13,6 @@ import {
   UploadCloud,
   User,
 } from 'lucide-react'
-import { AddressMapPicker, DeliveryRouteMap } from '@/components'
 import { extractErrorMessage, resolveImageUrl } from '@/api/client'
 import { saveOwnProfile, uploadOwnAvatar } from '@/services'
 import { formatPrice } from '@/utils/currency'
@@ -102,7 +101,6 @@ export function AccountPage({
   showToast,
 }: AccountPageProps) {
   const { t } = useI18n()
-  const [expandedOrderMapId, setExpandedOrderMapId] = useState<number | string | null>(null)
   const [uploadingAvatar, setUploadingAvatar] = useState(false)
   const [showManualUrl, setShowManualUrl] = useState(false)
   const [sidebarImgFailed, setSidebarImgFailed] = useState(false)
@@ -524,20 +522,6 @@ export function AccountPage({
                 >
                   <h4>{editingAddress ? t('Edit Delivery Address') : t('Add New Address')}</h4>
 
-                  <AddressMapPicker
-                    street={addressForm.street}
-                    city={addressForm.city}
-                    title={t('Interactive OpenStreetMap Address Pin-Picker')}
-                    onSelectLocation={({ street, city }) => {
-                      setAddressForm((prev) => ({
-                        ...prev,
-                        street: street || prev.street,
-                        city: city || prev.city,
-                      }))
-                      showToast(`Map location selected: ${street}, ${city}`, 'info')
-                    }}
-                  />
-
                   <div className="nx-form-row-2">
                     <div className="nx-form-field">
                       <label>{t('Receiver Name')}</label>
@@ -770,20 +754,6 @@ export function AccountPage({
                             <strong>{t('Total:')} {formatPrice(ord.total)}</strong>
                           </div>
                           <div className="nx-order-actions">
-                            <button
-                              type="button"
-                              className="nx-btn nx-btn-outline nx-btn-sm"
-                              onClick={() =>
-                                setExpandedOrderMapId(
-                                  expandedOrderMapId === ord.id ? null : ord.id,
-                                )
-                              }
-                            >
-                              <MapPin size={14} />{' '}
-                              {expandedOrderMapId === ord.id
-                                ? t('Hide Delivery Map')
-                                : t('Track on OpenStreetMap')}
-                            </button>
                             {ord.status !== 'cancelled' && onDownloadInvoice && (
                               <button
                                 type="button"
@@ -813,18 +783,6 @@ export function AccountPage({
                             )}
                           </div>
                         </div>
-
-                        {expandedOrderMapId === ord.id && (
-                          <div style={{ marginTop: '16px' }}>
-                            <DeliveryRouteMap
-                              address={
-                                ord.address || addresses.find((a) => a.status) || addresses[0]
-                              }
-                              orderNumber={ord.order_number || `#${ord.id}`}
-                              status={ord.status}
-                            />
-                          </div>
-                        )}
                       </div>
                     ))}
                   </div>

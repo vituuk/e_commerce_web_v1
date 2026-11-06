@@ -9,6 +9,9 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url))
 export default defineConfig({
   appType: 'spa',
   plugins: [react()],
+  server: {
+    port: 5174,
+  },
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),

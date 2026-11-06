@@ -16,6 +16,7 @@ export default defineConfig({
     },
   },
   server: {
+    port: 5173,
     fs: {
       allow: ['..', 'C:/Users/USER/.gemini/antigravity/brain'],
     },

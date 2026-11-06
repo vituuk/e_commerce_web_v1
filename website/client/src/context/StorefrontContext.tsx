@@ -190,7 +190,7 @@ export interface StorefrontContextValue {
   paywayModalOrder: Order | null
   setPaywayModalOrder: React.Dispatch<React.SetStateAction<Order | null>>
   openingPayway: boolean
-  handleOpenPaywayModal: (order: Order) => Promise<void>
+  handleOpenPaywayModal: (order: Order, paymentOption?: string) => Promise<void>
   handlePaymentUpdated: () => void
   handleAddToCart: (
     variantObj: ProductVariant | null,
@@ -640,7 +640,7 @@ export function StorefrontProvider({ children }: { children: ReactNode }) {
   const deleteReviewMutation = useDeleteReview()
 
   const [checkoutPaymentMethod, setCheckoutPaymentMethod] =
-    useState<CheckoutPaymentMethod>('cards')
+    useState<CheckoutPaymentMethod>('')
   const [creditCardForm, setCreditCardForm] = useState<CreditCardFormState>({
     number: '',
     name: '',
@@ -1103,6 +1103,14 @@ export function StorefrontProvider({ children }: { children: ReactNode }) {
       return
     }
 
+    if (!checkoutPaymentMethod) {
+      showToast(
+        'Step 4: Please select a payment method (Credit card or PayWay KHQR)',
+        'error',
+      )
+      return
+    }
+
     const outOfStockItem = cart.items.find(
       (i) =>
         i.variant?.stock_qty !== undefined &&
@@ -1369,12 +1377,15 @@ export function StorefrontProvider({ children }: { children: ReactNode }) {
   }, [refetchOrders, refetchPayments])
 
   const handleOpenPaywayModal = useCallback(
-    async (order: Order) => {
+    async (order: Order, paymentOption?: string) => {
       if (!order?.id || openingPayway) return
       setOpeningPayway(true)
       try {
+        const resolvedOption =
+          paymentOption || (checkoutPaymentMethod === 'cards' ? 'cards' : 'abapay_khqr')
         await openAbaPaywayKhqrPopup({
           order,
+          paymentOption: resolvedOption,
           onPaymentSuccess: () => {
             closeAbaPopupInPlace()
             setConfirmedOrder(null)
@@ -1397,7 +1408,7 @@ export function StorefrontProvider({ children }: { children: ReactNode }) {
         setOpeningPayway(false)
       }
     },
-    [navigateToPage, openingPayway, refetchCart, refetchOrders, refetchPayments, showToast],
+    [checkoutPaymentMethod, navigateToPage, openingPayway, refetchCart, refetchOrders, refetchPayments, showToast],
   )
 
   const contextValue: StorefrontContextValue = {

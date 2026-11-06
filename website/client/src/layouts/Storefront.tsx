@@ -116,6 +116,8 @@ function StorefrontContent() {
     setConfirmedOrder,
     paywayModalOrder,
     setPaywayModalOrder,
+    openingPayway,
+    handleOpenPaywayModal,
     handlePaymentUpdated,
     handleAddToCart,
     handleOurProductAddToCart,
@@ -301,9 +303,9 @@ function StorefrontContent() {
             onPlaceOrder={handlePlaceOrder}
             confirmedOrder={confirmedOrder}
             setConfirmedOrder={setConfirmedOrder}
+            openingPayway={openingPayway}
             onOpenPaywayModal={(order) => {
-              setPaywayModalOrder(null)
-              setTimeout(() => setPaywayModalOrder({ ...order }), 30)
+              void handleOpenPaywayModal(order, checkoutPaymentMethod)
             }}
             onGoToAccountTab={goToAccountTab}
             onNavigateShop={() => navigateToPage('shop')}
@@ -342,8 +344,7 @@ function StorefrontContent() {
             onCancelOrder={handleCancelOrder}
             onDownloadInvoice={handleDownloadInvoice}
             onOpenPaywayModal={(order) => {
-              setPaywayModalOrder(null)
-              setTimeout(() => setPaywayModalOrder({ ...order }), 30)
+              void handleOpenPaywayModal(order)
             }}
             payments={payments}
             onVerifyPayment={handleVerifyPayment}

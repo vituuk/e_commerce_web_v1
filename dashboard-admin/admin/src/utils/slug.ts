@@ -107,6 +107,17 @@ export function toUrlSlug(value?: string | number | null): string {
     .replace(/^-+|-+$/g, '')
 }
 
+export function generateLiveSlug(text?: string | number | null): string {
+  if (text === undefined || text === null) return ''
+  return String(text)
+    .toLowerCase()
+    .replace(/^#+/, '')
+    .replace(/[^\w\s-]/g, '')
+    .replace(/[\s_]+/g, '-')
+    .replace(/-+/g, '-')
+    .replace(/^-+/, '')
+}
+
 export function normalizeAdminLabel(label?: string | null): string {
   const raw = String(label || '').trim()
   if (!raw) return 'Dashboard'

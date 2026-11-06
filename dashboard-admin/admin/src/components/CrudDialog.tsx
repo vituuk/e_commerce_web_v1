@@ -10,6 +10,7 @@ import {
 import { categoryApi, productApi } from '@/api/client'
 import { asterLinenFront, ameliaAvatar, editIcon } from '@/assets/img'
 import { useI18n } from '@/assets/i18n'
+import { generateLiveSlug } from '@/utils/slug'
 import { Cancel } from '@/components/Cancel'
 import { Close } from '@/components/Close'
 import { Delete } from '@/components/Delete'
@@ -161,6 +162,7 @@ export function CrudDialog({
   const [values, setValues] = useState<string[]>(() =>
     buildInitialValues(columns, label, row, initialMode),
   )
+  const [slugManuallyEdited, setSlugManuallyEdited] = useState(false)
   const [copied, setCopied] = useState(false)
   const [previewImage, setPreviewImage] = useState<{ src: string; title?: string } | null>(null)
   const [categories, setCategories] = useState<Array<{ id: number; name: string }>>([])
@@ -171,6 +173,7 @@ export function CrudDialog({
 
   useEffect(() => {
     setValues(buildInitialValues(columns, label, row, currentMode))
+    setSlugManuallyEdited(currentMode === 'edit' && Boolean(row))
   }, [row, columns, label, currentMode])
 
   useEffect(() => {
@@ -226,6 +229,31 @@ export function CrudDialog({
   const updateValue = (index: number, value: string) =>
     setValues((current) => {
       const next = current.map((item, itemIndex) => (itemIndex === index ? value : item))
+      const colLower = (columns[index] ?? '').toLowerCase().trim()
+      const slugIdx = columns.findIndex((c) => c.toLowerCase().trim() === 'slug')
+
+      // Auto-generate slug when Product name or Category name is typed
+      if (slugIdx >= 0) {
+        if (index === slugIdx) {
+          if (!value.trim()) {
+            setSlugManuallyEdited(false)
+          } else {
+            setSlugManuallyEdited(true)
+          }
+        } else {
+          const isNameCol =
+            colLower === 'product name' ||
+            colLower === 'category name' ||
+            colLower === 'name' ||
+            (label.toLowerCase() === 'product' && colLower.includes('name')) ||
+            (label.toLowerCase() === 'category' && colLower.includes('name'))
+
+          if (isNameCol && (!slugManuallyEdited || currentMode === 'add')) {
+            next[slugIdx] = generateLiveSlug(value)
+          }
+        }
+      }
+
       const subIdx = columns.findIndex((c) => c.toLowerCase() === 'subtotal')
       const discIdx = columns.findIndex((c) => c.toLowerCase() === 'discount')
       const shipIdx = columns.findIndex((c) => c.toLowerCase() === 'shipping fee')
@@ -278,13 +306,28 @@ export function CrudDialog({
 
   const handleFormSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
+    const submitValues = [...values]
+    const slugIdx = columns.findIndex((c) => c.toLowerCase().trim() === 'slug')
+    const nameIdx = columns.findIndex((c) => {
+      const cl = c.toLowerCase().trim()
+      return cl === 'product name' || cl === 'category name' || cl === 'name'
+    })
+
+    if (slugIdx >= 0) {
+      if (!submitValues[slugIdx]?.trim() && nameIdx >= 0 && submitValues[nameIdx]) {
+        submitValues[slugIdx] = generateLiveSlug(submitValues[nameIdx]).replace(/-+$/, '')
+      } else if (submitValues[slugIdx]) {
+        submitValues[slugIdx] = submitValues[slugIdx].trim().replace(/-+$/, '')
+      }
+    }
+
     for (let i = 0; i < columns.length; i += 1) {
       const col = columns[i]
       const colLower = col.toLowerCase()
       if (currentMode === 'add' && READONLY_COLUMNS.has(colLower)) continue
       if (!isFieldRequired(label, col, currentMode)) continue
 
-      const val = (values[i] ?? '').trim()
+      const val = (submitValues[i] ?? '').trim()
       if (!val || val === '—') {
         const control = event.currentTarget.querySelector<
           HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
@@ -296,7 +339,7 @@ export function CrudDialog({
         }
       }
     }
-    onSave(values)
+    onSave(submitValues)
   }
 
   const renderFieldLabel = (column: string, required: boolean) => (

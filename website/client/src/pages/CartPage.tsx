@@ -37,9 +37,6 @@ export function CartPage({
       <div className="nx-page-banner">
         <div>
           <h1>{t('Your Shopping Cart')}</h1>
-          <p>
-            {t('Review your selected clothing variants, adjust quantities, validate available stock, and proceed to checkout.')}
-          </p>
         </div>
       </div>
 

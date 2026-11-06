@@ -7,6 +7,7 @@ import { Close } from '@/components/Close'
 import { Cancel } from '@/components/Cancel'
 import { Create } from '@/components/Create'
 import { Edit } from '@/components/Edit'
+import { generateLiveSlug } from '@/utils/slug'
 import { toast } from 'sonner'
 
 const categorySchema = z.object({
@@ -116,7 +117,12 @@ export function CategoryForm({ open, setOpen, category }: CategoryFormProps) {
                   </span>
                   <input
                     value={field.state.value}
-                    onChange={(e) => field.handleChange(e.target.value)}
+                    onChange={(e) => {
+                      field.handleChange(e.target.value)
+                      if (!category?.id) {
+                        form.setFieldValue('slug', generateLiveSlug(e.target.value))
+                      }
+                    }}
                     placeholder="Enter category name"
                     required
                   />

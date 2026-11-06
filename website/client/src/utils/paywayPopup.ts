@@ -94,13 +94,6 @@ export function closeAbaPopupInPlace(): void {
   if (typeof document === 'undefined') return
 
   const aba = getAbaPayway()
-  if (aba && typeof aba.closeCheckout === 'function') {
-    try {
-      aba.closeCheckout(false)
-    } catch {
-      // ignore
-    }
-  }
   if (aba && typeof aba.closeCheckoutByContinueUrl === 'function') {
     try {
       aba.closeCheckoutByContinueUrl()
@@ -108,6 +101,9 @@ export function closeAbaPopupInPlace(): void {
       // ignore
     }
   }
+
+  // NOTE: Never call aba.closeCheckout(false) here because ABA's checkout2-0.js
+  // triggers `location.reload()`, which would kill the playing audio stream.
 
   const iframe = document.querySelector<HTMLIFrameElement>('iframe[name="aba_webservice"]')
   if (iframe) {
@@ -150,18 +146,21 @@ export function closeAbaPopupInPlace(): void {
 
 export interface OpenAbaPaywayPopupParams {
   order: Order
+  paymentOption?: string
   onPaymentSuccess?: (payment?: PaymentRecord) => void
   onPaymentUpdated?: (payment?: PaymentRecord) => void
   showToast: (message: string, type?: ToastType) => void
 }
 
 /**
- * Directly requests a signed KHQR payload for `order`, builds `#aba_merchant_request`,
- * opens the official ABA PayWay KHQR popup overlay (`AbaPayway.checkout()`) on top of
- * the current page, polls verification, and navigates home upon success.
+ * Directly requests a signed PayWay payload for `order` (cards or abapay_khqr),
+ * builds `#aba_merchant_request`, opens the official ABA PayWay popup overlay
+ * (`AbaPayway.checkout()`) on top of the current page, polls verification, and
+ * navigates home upon success.
  */
 export async function openAbaPaywayKhqrPopup({
   order,
+  paymentOption,
   onPaymentSuccess,
   onPaymentUpdated,
   showToast,
@@ -181,13 +180,16 @@ export async function openAbaPaywayKhqrPopup({
       return
     }
 
+    const selectedOption =
+      paymentOption === 'cards' ? 'cards' : 'abapay_khqr'
+
     const data: PaywayCheckoutResponse | null = await checkoutPaywayPayment({
       orderId: order.id,
-      payment_option: 'abapay_khqr',
+      payment_option: selectedOption,
     })
 
     if (!data) {
-      throw new Error('Failed to create ABA PayWay KHQR payment')
+      throw new Error(`Failed to create ABA PayWay payment (${selectedOption})`)
     }
 
     const actionUrl = data.payway?.action || data.action_url || ''
@@ -240,11 +242,13 @@ export async function openAbaPaywayKhqrPopup({
       if (completed) return
       completed = true
       stopPaywayPolling()
-      closeAbaPopupInPlace()
       playPaymentSuccessSound()
+      closeAbaPopupInPlace()
       showToast('Payment approved! Order is now marked as PAID.', 'success')
       onPaymentUpdated?.(verifiedPayment)
-      onPaymentSuccess?.(verifiedPayment)
+      setTimeout(() => {
+        onPaymentSuccess?.(verifiedPayment)
+      }, 1200)
     }
 
     // Called if the iframe redirects to continue_success_url and posts a message

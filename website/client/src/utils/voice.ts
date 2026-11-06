@@ -2,7 +2,7 @@
  * Voice & Sound Notification Utility for Storefront
  *
  * Supports:
- * 1. Your own custom sound / recorded voice file (.mp3, .wav, .m4a) in `public/sounds/`
+ * 1. Direct custom sound file (.mp3 / .ogg / .wav) from public folder
  * 2. Browser text-to-speech (Web Speech API) fallback
  */
 
@@ -30,7 +30,7 @@ if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
  * Speaks text using the browser's native text-to-speech engine.
  */
 export function playVoiceNotification(
-  text: string = 'ការបញ្ជាទិញរបស់អ្នកទទួលបានជោគជ័យ!',
+  text: string = 'ការទូទាត់ប្រាក់របស់អ្នកទទួលបានជោគជ័យ!',
   options: PlayVoiceOptions = {},
 ): void {
   if (typeof window === 'undefined' || !('speechSynthesis' in window)) {
@@ -47,10 +47,8 @@ export function playVoiceNotification(
     utterance.volume = options.volume ?? 1.0
     utterance.lang = options.lang ?? 'km-KH'
 
-    // Look for a Khmer voice, or best available
     const voices = cachedVoices.length > 0 ? cachedVoices : synth.getVoices()
     if (voices.length > 0) {
-      const targetLang = (options.lang ?? 'km').toLowerCase()
       const khmerVoice = voices.find(
         (v) =>
           v.lang.toLowerCase().startsWith('km') ||
@@ -64,7 +62,7 @@ export function playVoiceNotification(
       } else {
         const naturalVoice = voices.find(
           (v) =>
-            v.lang.startsWith(targetLang.slice(0, 2)) ||
+            v.lang.startsWith((options.lang ?? 'km').toLowerCase().slice(0, 2)) ||
             v.name.includes('Natural') ||
             v.name.includes('Google') ||
             v.default,
@@ -79,8 +77,11 @@ export function playVoiceNotification(
   }
 }
 
+// Global active audio references so React DOM unmounting/navigation never terminates playback
+const activeAudioList: HTMLAudioElement[] = []
+
 /**
- * Plays a custom sound file (.ogg / .mp3 / .wav) from public folder.
+ * Plays a custom sound file (.mp3 / .ogg / .wav) from public folder.
  * Accepts a single URL or an array of URLs to try in order.
  * If all fail or are missing, falls back to text-to-speech synthesis.
  */
@@ -105,11 +106,14 @@ export function playCustomSound(
       try {
         const audio = new Audio(urls[index])
         audio.volume = options.volume ?? 1.0
+        activeAudioList.push(audio)
 
         let resolved = false
         const done = (success: boolean) => {
           if (!resolved) {
             resolved = true
+            const idx = activeAudioList.indexOf(audio)
+            if (idx >= 0) activeAudioList.splice(idx, 1)
             resolve(success)
           }
         }
@@ -123,7 +127,8 @@ export function playCustomSound(
         if (playPromise !== undefined) {
           playPromise
             .then(() => done(true))
-            .catch(() => {
+            .catch((err) => {
+              console.warn(`[voice] audio.play() caught for ${urls[index]}:`, err)
               tryPlay(index + 1).then(done)
             })
         }
@@ -138,7 +143,7 @@ export function playCustomSound(
 
 /**
  * Plays the Order Success Sound.
- * Connects directly to `/sounds/orders.mp3` in the public folder.
+ * Connects directly to `/sounds/orders.mp3`.
  */
 export function playOrderSuccessSound(): void {
   void playCustomSound(
@@ -155,7 +160,7 @@ export function playOrderSuccessSound(): void {
 
 /**
  * Plays the Payment Approved Sound.
- * Connects directly to `/sounds/payment.mp3` in the public folder.
+ * Connects directly to `/sounds/payment.mp3`.
  */
 export function playPaymentSuccessSound(): void {
   void playCustomSound(

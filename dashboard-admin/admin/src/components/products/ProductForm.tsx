@@ -7,6 +7,7 @@ import { Close } from '@/components/Close'
 import { Cancel } from '@/components/Cancel'
 import { Create } from '@/components/Create'
 import { Edit } from '@/components/Edit'
+import { generateLiveSlug } from '@/utils/slug'
 import { toast } from 'sonner'
 
 const productSchema = z.object({
@@ -130,7 +131,12 @@ export function ProductForm({ open, setOpen, product }: ProductFormProps) {
                   <span>Product Name</span>
                   <input
                     value={field.state.value}
-                    onChange={(e) => field.handleChange(e.target.value)}
+                    onChange={(e) => {
+                      field.handleChange(e.target.value)
+                      if (!product?.id) {
+                        form.setFieldValue('slug', generateLiveSlug(e.target.value))
+                      }
+                    }}
                     required
                   />
                 </label>

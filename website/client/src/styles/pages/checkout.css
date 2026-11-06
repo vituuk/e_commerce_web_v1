@@ -343,16 +343,44 @@
 .nx-order-confirmation-card {
   background: #ffffff;
   border: 1px solid #e2e8f0;
- border-radius: 2px;
-  padding: 40px 32px;
+  border-radius: 2px;
+  padding: 44px 36px;
   text-align: center;
+  max-width: 860px;
+  margin: 20px auto 40px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
+  transition: all 0.2s ease-in-out;
+}
+
+.nx-order-confirmation-card .nx-eyebrow {
+  display: inline-block;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #0284c7;
+  margin-bottom: 8px;
+}
+
+.nx-order-confirmation-card h2 {
+  font-size: clamp(20px, 2vw, 26px);
+  font-weight: 700;
+  color: #0f172a;
+  margin: 6px 0 12px;
+  line-height: 1.35;
+}
+
+.nx-order-confirmation-card p {
+  font-size: clamp(14px, 1.05vw, 16px);
+  color: #475569;
   max-width: 720px;
   margin: 0 auto;
+  line-height: 1.6;
 }
 
 .nx-confirm-badge {
-  width: 60px;
-  height: 60px;
+  width: 68px;
+  height: 68px;
   border-radius: 999px;
   background: #ecfdf5;
   color: #059669;
@@ -362,26 +390,109 @@
   margin-bottom: 14px;
 }
 
+.nx-confirm-badge svg {
+  width: 34px;
+  height: 34px;
+}
+
 .nx-confirm-meta-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 12px;
+  gap: 16px;
   background: #f8fafc;
-  padding: 16px;
+  border: 1px solid #f1f5f9;
+  padding: 22px 20px;
   border-radius: 14px;
-  margin: 22px 0;
+  margin: 26px 0 30px;
 }
 
 .nx-confirm-meta-grid span {
   display: block;
-  font-size: 11.5px;
+  font-size: 12px;
   color: #64748b;
+  margin-bottom: 6px;
+  font-weight: 500;
+}
+
+.nx-confirm-meta-grid strong {
+  display: block;
+  font-size: clamp(14px, 1.1vw, 17px);
+  color: #0f172a;
+  font-weight: 700;
+  word-break: break-word;
 }
 
 .nx-confirm-actions {
   display: flex;
   justify-content: center;
-  gap: 12px;
+  gap: 14px;
   flex-wrap: wrap;
+}
+
+.nx-confirm-actions .nx-btn {
+  padding: 12px 24px;
+  font-size: 14px;
+  font-weight: 600;
+  border-radius: 2px;
+}
+
+/* Scaling up on bigger screens (matching reference Image 2) */
+@media (min-width: 1024px) {
+  .nx-order-confirmation-card {
+    max-width: 980px;
+    padding: 52px 48px;
+    margin: 28px auto 48px;
+  }
+  .nx-confirm-meta-grid {
+    padding: 24px 28px;
+    gap: 20px;
+  }
+}
+
+@media (min-width: 1280px) {
+  .nx-order-confirmation-card {
+    max-width: 1140px;
+    padding: 60px 56px;
+    margin: 36px auto 56px;
+  }
+  .nx-confirm-meta-grid {
+    padding: 28px 36px;
+    gap: 24px;
+  }
+  .nx-confirm-actions {
+    gap: 18px;
+  }
+}
+
+@media (min-width: 1536px) {
+  .nx-order-confirmation-card {
+    max-width: 1240px;
+    padding: 68px 64px;
+    margin: 40px auto 64px;
+  }
+}
+
+/* Responsive adjustment for small screens */
+@media (max-width: 640px) {
+  .nx-order-confirmation-card {
+    padding: 28px 16px;
+  }
+  .nx-confirm-meta-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+    padding: 16px;
+  }
+}
+
+@media (max-width: 420px) {
+  .nx-confirm-meta-grid {
+    grid-template-columns: 1fr;
+  }
+  .nx-confirm-actions {
+    flex-direction: column;
+  }
+  .nx-confirm-actions .nx-btn {
+    width: 100%;
+  }
 }
 

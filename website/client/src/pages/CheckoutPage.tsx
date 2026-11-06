@@ -8,10 +8,7 @@ import {
   Plus,
 } from 'lucide-react'
 import {
-  AddressMapPicker,
-  DeliveryRouteMap,
   MastercardLogo,
-  PaypalLogo,
   VisaLogo,
 } from '@/components'
 import { formatPrice } from '@/utils/currency'
@@ -139,16 +136,6 @@ export function CheckoutPage({
             </div>
           </div>
 
-          <div style={{ margin: '20px 0', textAlign: 'left' }}>
-            <DeliveryRouteMap
-              address={
-                addresses.find((a) => String(a.id) === String(selectedAddressId)) || addresses[0]
-              }
-              orderNumber={confirmedOrder.order_number}
-              status={confirmedOrder.status}
-            />
-          </div>
-
           <div className="nx-confirm-actions">
             {confirmedOrder.status === 'paid' || confirmedOrder.payment_status === 'paid' ? (
               <button
@@ -170,11 +157,11 @@ export function CheckoutPage({
                 <CreditCard size={16} />
                 <span>
                   {openingPayway
-                    ? 'Opening ABA KHQR...'
+                    ? checkoutPaymentMethod === 'cards'
+                      ? 'Opening Card Payment...'
+                      : 'Opening ABA KHQR...'
                     : checkoutPaymentMethod === 'cards'
                     ? 'Pay Now with Credit Card'
-                    : checkoutPaymentMethod === 'paypal'
-                    ? 'Pay Now with PayPal'
                     : 'Pay Now with PayWay KHQR'}
                 </span>
               </button>
@@ -229,21 +216,6 @@ export function CheckoutPage({
 
               {showCheckoutNewAddr && (
                 <form className="nx-inline-address-form" onSubmit={onSaveAddress}>
-                  <AddressMapPicker
-                    street={addressForm.street}
-                    city={addressForm.city}
-                    title="Pin Your Delivery Location on OpenStreetMap"
-                    compact
-                    onSelectLocation={({ street, city }) => {
-                      setAddressForm((prev) => ({
-                        ...prev,
-                        street: street || prev.street,
-                        city: city || prev.city,
-                      }))
-                      showToast(`Pinned location: ${street}, ${city}`, 'info')
-                    }}
-                  />
-
                   <div className="nx-form-row-2">
                     <div className="nx-form-field">
                       <label>Receiver Name</label>
@@ -275,7 +247,7 @@ export function CheckoutPage({
                   </div>
                   <div className="nx-form-row-2">
                     <div className="nx-form-field">
-                      <label>{t('Street Address (Auto-filled from OpenStreetMap or type)')}</label>
+                      <label>{t('Street Address')}</label>
                       <input
                         type="text"
                         required
@@ -311,48 +283,34 @@ export function CheckoutPage({
 
               {addresses.length === 0 ? (
                 <p className="nx-muted">
-                  No saved addresses yet. Click &ldquo;New Address&rdquo; above to pin and save
-                  your delivery destination on OpenStreetMap.
+                  No saved addresses yet. Click &ldquo;New Address&rdquo; above to enter
+                  your delivery address.
                 </p>
               ) : (
-                <>
-                  <div className="nx-address-select-grid">
-                    {addresses.map((addr) => (
-                      <div
-                        key={addr.id}
-                        className={`nx-address-option ${
-                          String(selectedAddressId) === String(addr.id) ? 'selected' : ''
-                        }`}
-                        onClick={() => setSelectedAddressId(addr.id)}
-                      >
-                        <div className="nx-address-option-top">
-                          <strong>{addr.receiver_name}</strong>
-                          {addr.status && <span className="nx-default-pill">Default</span>}
-                        </div>
-                        <p>{addr.phone}</p>
-                        <p>
-                          <MapPin
-                            size={13}
-                            style={{ verticalAlign: 'middle', marginRight: '4px' }}
-                          />
-                          {addr.street}, {addr.city}
-                        </p>
+                <div className="nx-address-select-grid">
+                  {addresses.map((addr) => (
+                    <div
+                      key={addr.id}
+                      className={`nx-address-option ${
+                        String(selectedAddressId) === String(addr.id) ? 'selected' : ''
+                      }`}
+                      onClick={() => setSelectedAddressId(addr.id)}
+                    >
+                      <div className="nx-address-option-top">
+                        <strong>{addr.receiver_name}</strong>
+                        {addr.status && <span className="nx-default-pill">Default</span>}
                       </div>
-                    ))}
-                  </div>
-
-                  {!showCheckoutNewAddr && (
-                    <div style={{ marginTop: '16px' }}>
-                      <DeliveryRouteMap
-                        address={
-                          addresses.find((a) => String(a.id) === String(selectedAddressId)) ||
-                          addresses[0]
-                        }
-                        status="ready_to_ship"
-                      />
+                      <p>{addr.phone}</p>
+                      <p>
+                        <MapPin
+                          size={13}
+                          style={{ verticalAlign: 'middle', marginRight: '4px' }}
+                        />
+                        {addr.street}, {addr.city}
+                      </p>
                     </div>
-                  )}
-                </>
+                  ))}
+                </div>
               )}
             </div>
 
@@ -435,8 +393,11 @@ export function CheckoutPage({
               <div className="nx-step-header">
                 <span className="nx-step-num">4</span>
                 <div>
-                  <h3>Select an Available Payment Method</h3>
-                  <span className="nx-step-sub">Credit Card, PayPal, or PayWay KHQR</span>
+                  <h3>
+                    Select an Available Payment Method{' '}
+                    <span style={{ color: '#ef4444' }}>*</span>
+                  </h3>
+                  <span className="nx-step-sub">Credit Card or PayWay KHQR (Required)</span>
                 </div>
               </div>
 
@@ -468,88 +429,9 @@ export function CheckoutPage({
                       <MastercardLogo />
                     </div>
                   </div>
-
-                  {checkoutPaymentMethod === 'cards' && (
-                    <div className="nx-card-fields-grid">
-                      <input
-                        type="text"
-                        className="nx-card-underline-input"
-                        placeholder="Card number"
-                        value={creditCardForm.number}
-                        maxLength={19}
-                        onChange={(e) => {
-                          const val = e.target.value.replace(/\D/g, '').slice(0, 16)
-                          const formatted = val.replace(/(\d{4})(?=\d)/g, '$1 ')
-                          setCreditCardForm((prev) => ({ ...prev, number: formatted }))
-                        }}
-                      />
-                      <input
-                        type="text"
-                        className="nx-card-underline-input"
-                        placeholder="Cardholder name"
-                        value={creditCardForm.name}
-                        onChange={(e) =>
-                          setCreditCardForm((prev) => ({ ...prev, name: e.target.value }))
-                        }
-                      />
-                      <input
-                        type="text"
-                        className="nx-card-underline-input"
-                        placeholder="Expiration date (MM/YY)"
-                        value={creditCardForm.exp}
-                        maxLength={5}
-                        onChange={(e) => {
-                          let val = e.target.value.replace(/\D/g, '').slice(0, 4)
-                          if (val.length >= 3) {
-                            val = `${val.slice(0, 2)}/${val.slice(2)}`
-                          }
-                          setCreditCardForm((prev) => ({ ...prev, exp: val }))
-                        }}
-                      />
-                      <input
-                        type="text"
-                        className="nx-card-underline-input"
-                        placeholder="CVV"
-                        value={creditCardForm.cvv}
-                        maxLength={4}
-                        onChange={(e) => {
-                          const val = e.target.value.replace(/\D/g, '').slice(0, 4)
-                          setCreditCardForm((prev) => ({ ...prev, cvv: val }))
-                        }}
-                      />
-                    </div>
-                  )}
                 </div>
 
-                {/* Option 2: PayPal */}
-                <div
-                  className={`nx-payment-item-block ${
-                    checkoutPaymentMethod === 'paypal' ? 'selected' : ''
-                  }`}
-                >
-                  <div
-                    className="nx-payment-item-header"
-                    onClick={() => setCheckoutPaymentMethod('paypal')}
-                    role="button"
-                    tabIndex={0}
-                  >
-                    <div className="nx-payment-label-wrap">
-                      <span
-                        className={`nx-payment-radio ${
-                          checkoutPaymentMethod === 'paypal' ? 'checked' : ''
-                        }`}
-                      >
-                        <span className="nx-payment-radio-dot" />
-                      </span>
-                      <span>PayPal</span>
-                    </div>
-                    <div className="nx-payment-logos-row">
-                      <PaypalLogo />
-                    </div>
-                  </div>
-                </div>
-
-                {/* Option 3: PayWay KHQR */}
+                {/* Option 2: PayWay KHQR */}
                 <div
                   className={`nx-payment-item-block ${
                     checkoutPaymentMethod === 'abapay_khqr' ? 'selected' : ''
@@ -580,6 +462,21 @@ export function CheckoutPage({
                   </div>
                 </div>
               </div>
+
+              {!checkoutPaymentMethod && (
+                <p
+                  style={{
+                    margin: '12px 0 0',
+                    fontSize: '12.5px',
+                    color: '#dc2626',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '4px',
+                  }}
+                >
+                  * Please choose either Credit card or PayWay KHQR to proceed.
+                </p>
+              )}
             </div>
           </div>
 
