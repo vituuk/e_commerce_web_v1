@@ -1,0 +1,45 @@
+{
+  "Workspace": "Workspace",
+  "Management": "Management",
+  "Languages": "Languages",
+  "English": "English",
+  "Khmer": "Khmer",
+  "Light mode": "Light mode",
+  "Dark mode": "Dark mode",
+  "Dashboard": "Dashboard",
+  "Orders": "Orders",
+  "Order items": "Order items",
+  "Products": "Products",
+  "Product variants": "Product variants",
+  "Product images": "Product images",
+  "Categories": "Categories",
+  "Carts": "Carts",
+  "Cart items": "Cart items",
+  "Users": "Users",
+  "User profiles": "User profiles",
+  "Roles": "Roles",
+  "User roles": "User roles",
+  "Addresses": "Addresses",
+  "Payments": "Payments",
+  "Reviews": "Reviews",
+  "Settings": "Settings",
+  "Customers": "Customers",
+  "Roles & access": "Roles & access",
+  "categories": {
+    "id": "ID",
+    "name": "Category Name",
+    "slug": "Slug",
+    "status": "Status",
+    "createdAt": "Created At",
+    "actions": "Actions"
+  },
+  "products": {
+    "id": "ID",
+    "name": "Product Name",
+    "category": "Category",
+    "price": "Base Price",
+    "status": "Status",
+    "actions": "Actions"
+  }
+}
+

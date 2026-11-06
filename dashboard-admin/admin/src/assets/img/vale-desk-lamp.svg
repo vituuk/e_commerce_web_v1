@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240" width="240" height="240">
+  <defs>
+    <linearGradient id="bg5" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#fef9ec" />
+      <stop offset="100%" stop-color="#f6ebc8" />
+    </linearGradient>
+    <filter id="shadow5" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="6" stdDeviation="6" flood-color="#5a4312" flood-opacity="0.14" />
+    </filter>
+  </defs>
+  <rect width="240" height="240" rx="24" fill="url(#bg5)" />
+  <g filter="url(#shadow5)">
+    <!-- Warm Light Glow -->
+    <polygon points="108,96 58,186 158,186" fill="#fff3c4" opacity="0.65" />
+    <!-- Lamp Stand & Arm -->
+    <path d="M148 184 L148 68 L106 68" fill="none" stroke="#c49438" stroke-width="8" stroke-linecap="round" stroke-linejoin="round" />
+    <!-- Lamp Shade (Brass Cone) -->
+    <path d="M84 96 L132 96 L116 64 L100 64 Z" fill="#d9a848" stroke="#a67a23" stroke-width="2.5" stroke-linejoin="round" />
+    <!-- Base -->
+    <rect x="114" y="182" width="66" height="12" rx="6" fill="#b8872d" stroke="#8f6519" stroke-width="2" />
+  </g>
+</svg>
+

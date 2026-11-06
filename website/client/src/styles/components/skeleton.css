@@ -1,0 +1,207 @@
+/* ==========================================================================
+   SKELETON LOADING — Clean Rounded Block + 3-Row Shimmer Pattern
+   ========================================================================== */
+
+@keyframes nxSkeletonWave {
+  0% {
+    background-position: 100% 0;
+  }
+  100% {
+    background-position: -100% 0;
+  }
+}
+
+/* Primary media block shimmer (matches top grey rounded card in reference) */
+.nx-skeleton-box {
+  background: linear-gradient(
+    90deg,
+    #d8d8d8 0%,
+    #d8d8d8 20%,
+    #ececec 50%,
+    #d8d8d8 80%,
+    #d8d8d8 100%
+  );
+  background-size: 200% 100%;
+  animation: nxSkeletonWave 1.0s ease-in-out infinite;
+}
+
+/* Secondary text-line bars shimmer (matches lighter 3 stacked bars below) */
+.nx-skeleton-shimmer {
+  background: linear-gradient(
+    90deg,
+    #d8d8d8 0%,
+    #d8d8d8 20%,
+    #ececec 50%,
+    #d8d8d8 80%,
+    #d8d8d8 100%
+  );
+  background-size: 200% 100%;
+  animation: nxSkeletonWave 1.0s ease-in-out infinite;
+}
+
+.nx-skeleton-card {
+  pointer-events: none;
+  cursor: default !important;
+}
+
+/* Progressive image shimmer while photo decodes */
+.nx-media-shimmer-active {
+  background: linear-gradient(
+    90deg,
+    #d8d8d8 0%,
+    #d8d8d8 20%,
+    #ececec 50%,
+    #d8d8d8 80%,
+    #d8d8d8 100%
+  ) !important;
+  background-size: 200% 100% !important;
+  animation: nxSkeletonWave 1.0s ease-in-out infinite;
+}
+
+/* ---------- 1. Category & Product Card Skeleton (3-Bar Stack) ---------- */
+.nx-skeleton-category-track {
+  cursor: default !important;
+  overflow: hidden;
+}
+
+.nx-skeleton-category-media {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  border-radius: 8px;
+}
+
+.nx-skeleton-product-media {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.nx-skeleton-bars {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+  margin-top: 12px;
+  width: 100%;
+}
+
+.nx-skeleton-bar-1 {
+  width: 100%;
+  height: 14px;
+  border-radius: 4px;
+}
+
+.nx-skeleton-bar-2 {
+  width: 75%;
+  height: 14px;
+  border-radius: 4px;
+}
+
+.nx-skeleton-bar-3 {
+  width: 48%;
+  height: 14px;
+  border-radius: 4px;
+}
+
+/* Slightly compact bar heights for smaller category cards */
+.nx-category-card .nx-skeleton-bars {
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.nx-category-card .nx-skeleton-bar-1 {
+  width: 100%;
+  height: 13px;
+  border-radius: 4px;
+}
+
+.nx-category-card .nx-skeleton-bar-2 {
+  width: 75%;
+  height: 13px;
+  border-radius: 4px;
+}
+
+.nx-category-card .nx-skeleton-bar-3 {
+  width: 48%;
+  height: 13px;
+  border-radius: 4px;
+}
+
+/* ---------- 2. Shop Sidebar Category, Color & Size Filter Skeletons ---------- */
+.nx-skeleton-filter-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 4px;
+  gap: 12px;
+}
+
+.nx-skeleton-filter-name {
+  height: 14px;
+  border-radius: 4px;
+}
+
+.nx-skeleton-filter-count {
+  width: 24px;
+  height: 14px;
+  border-radius: 4px;
+  flex-shrink: 0;
+}
+
+.nx-skeleton-color-circle {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+}
+
+.nx-skeleton-color-label {
+  width: 44px;
+  height: 10px;
+  border-radius: 4px;
+}
+
+.nx-skeleton-size-tile {
+  height: 38px;
+  width: 100%;
+  border-radius: 6px;
+}
+
+/* ---------- 3. Product Detail Page Skeleton ---------- */
+.nx-skeleton-detail-info {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding-top: 6px;
+}
+
+.nx-skeleton-line {
+  border-radius: 5px;
+}
+
+.nx-skeleton-swatch-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 4px;
+}
+
+.nx-skeleton-swatch-circle {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+}
+
+.nx-skeleton-detail-sizes {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 64px));
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.nx-skeleton-detail-cta {
+  height: 46px;
+  width: 100%;
+  border-radius: 6px;
+  margin-top: 8px;
+}

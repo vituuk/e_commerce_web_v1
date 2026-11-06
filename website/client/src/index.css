@@ -1,0 +1,65 @@
+@layer theme, base, components, utilities;
+@import "tailwindcss/theme.css" layer(theme);
+@import "tailwindcss/utilities.css" layer(utilities);
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+:root {
+  --sh-font: "Inter Tight", "Noto Sans Khmer", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --td-serif: var(--sh-font);
+  --td-sans: var(--sh-font);
+  --ug-font: var(--sh-font);
+
+  --sh-bg: #f5f5f5;
+  --sh-surface: #ffffff;
+  --sh-text: #141414;
+  --sh-muted: #737373;
+  --sh-border: #e8e8e8;
+  --sh-black: #171717;
+}
+
+body.battambang,
+.battambang,
+body.noto-sans-khmer,
+.noto-sans-khmer {
+  --sh-font: "Battambang", "Inter Tight", system-ui, sans-serif;
+  font-family: "Battambang", "Inter Tight", system-ui, sans-serif;
+}
+
+body.inter-tight,
+.inter-tight {
+  --sh-font: "Inter Tight", "Battambang", sans-serif;
+  font-family: "Inter Tight", "Battambang", sans-serif;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  background-color: var(--sh-bg);
+  color: var(--sh-text);
+  font-family: var(--sh-font);
+  font-size: 14px;
+  line-height: 1.5;
+  overflow-x: clip;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+#root {
+  width: 100%;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+button,
+input,
+select,
+textarea {
+  font-family: inherit;
+}

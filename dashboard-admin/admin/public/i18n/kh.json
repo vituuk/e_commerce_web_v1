@@ -1,0 +1,45 @@
+{
+  "Workspace": "កន្លែងធ្វើការ",
+  "Management": "ការគ្រប់គ្រង",
+  "Languages": "ភាសា",
+  "English": "English",
+  "Khmer": "ភាសាខ្មែរ",
+  "Light mode": "ទម្រង់ភ្លឺ",
+  "Dark mode": "ទម្រង់ងងឹត",
+  "Dashboard": "ផ្ទាំងគ្រប់គ្រង",
+  "Orders": "ការបញ្ជាទិញ",
+  "Order items": "មុខទំនិញបញ្ជាទិញ",
+  "Products": "ផលិតផល",
+  "Product variants": "ជម្រើសផលិតផល",
+  "Product images": "រូបភាពផលិតផល",
+  "Categories": "ប្រភេទទំនិញ",
+  "Carts": "កន្ត្រកទំនិញ",
+  "Cart items": "ទំនិញក្នុងកន្ត្រក",
+  "Users": "អ្នកប្រើប្រាស់",
+  "User profiles": "ប្រវត្តិរូបអ្នកប្រើប្រាស់",
+  "Roles": "តួនាទី",
+  "User roles": "តួនាទីអ្នកប្រើប្រាស់",
+  "Addresses": "អាសយដ្ឋាន",
+  "Payments": "ការទូទាត់ប្រាក់",
+  "Reviews": "ការវាយតម្លៃ",
+  "Settings": "ការកំណត់",
+  "Customers": "អតិថិជន",
+  "Roles & access": "តួនាទី និងសិទ្ធិ",
+  "categories": {
+    "id": "លេខសម្គាល់",
+    "name": "ឈ្មោះប្រភេទ",
+    "slug": "Slug",
+    "status": "ស្ថានភាព",
+    "createdAt": "ថ្ងៃបង្កើត",
+    "actions": "សកម្មភាព"
+  },
+  "products": {
+    "id": "លេខសម្គាល់",
+    "name": "ឈ្មោះផលិតផល",
+    "category": "ប្រភេទ",
+    "price": "តម្លៃដើម",
+    "status": "ស្ថានភាព",
+    "actions": "សកម្មភាព"
+  }
+}
+

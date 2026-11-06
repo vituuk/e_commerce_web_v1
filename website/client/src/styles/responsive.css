@@ -1,0 +1,950 @@
+/* ---------- RESPONSIVE BREAKPOINTS ---------- */
+@media (max-width: 1100px) {
+  .nx-hero-cozy-banner {
+    max-height: 480px;
+    min-height: 340px;
+  }
+}
+
+@media (max-width: 860px) {
+  .nx-shop-layout,
+  .nx-product-detail-layout,
+  .nx-reviews-grid,
+  .nx-cart-layout,
+  .nx-checkout-layout,
+  .nx-account-layout,
+  .nx-footer-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .nx-shop-sidebar {
+    position: static;
+    max-height: none;
+  }
+  .nx-filter-card {
+    max-height: none;
+    overflow-y: visible;
+  }
+  .nx-shop-content {
+    max-height: none;
+    overflow-y: visible;
+    padding-right: 0;
+  }
+  .nx-shop-toolbar {
+    position: static;
+  }
+  .nx-detail-gallery {
+    max-width: 480px;
+    margin: 0 auto;
+  }
+  .nx-hero-cozy-banner {
+    aspect-ratio: 4 / 3;
+    max-height: 420px;
+    min-height: 300px;
+  }
+}
+
+@media (max-width: 600px) {
+  .nx-form-row-2 {
+    grid-template-columns: 1fr;
+  }
+  .nx-confirm-meta-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+  }
+  .nx-hero-cozy-banner {
+    aspect-ratio: 4 / 3;
+    min-height: 240px;
+  }
+  .nx-hero-cozy-btn-hotspot {
+    left: 12%;
+    top: 60%;
+    min-width: 110px;
+    min-height: 34px;
+    font-size: 10.5px;
+  }
+}
+
+@media (max-width: 640px) {
+  .nx-luxury-items-container,
+  .nx-checkout-luxury-list {
+    padding: 0 16px;
+  }
+  .nx-luxury-item-row {
+    padding: 16px 0;
+  }
+  .nx-luxury-thumb-wrap {
+    width: 76px;
+    height: 96px;
+  }
+  .nx-luxury-info {
+    padding-left: 14px;
+  }
+  .nx-luxury-title,
+  .nx-luxury-price {
+    font-size: 14.5px;
+  }
+  .nx-luxury-spec-label {
+    width: 70px;
+    min-width: 70px;
+  }
+}
+
+/* ==========================================================================
+   COMPREHENSIVE SMALL-DEVICE RESPONSIVE ENHANCEMENTS (ALL PAGES & MODALS)
+   ========================================================================== */
+
+.nx-app,
+.nx-header,
+.nx-main,
+.nx-footer,
+.nx-container {
+  width: 100%;
+  max-width: 100vw;
+  min-width: 0;
+  box-sizing: border-box;
+}
+
+.nx-app {
+  overflow-x: clip;
+}
+
+@media (max-width: 1120px) {
+  .nx-header-left {
+    gap: 14px;
+  }
+
+  .nx-nav {
+    gap: 2px;
+    flex-wrap: nowrap;
+  }
+
+  .nx-nav-link {
+    padding: 7px 10px;
+    font-size: 13px;
+    white-space: nowrap;
+  }
+
+  .nx-search-bar {
+    width: 165px;
+  }
+}
+
+@media (max-width: 940px) {
+  .nx-brand-copy span {
+    display: none;
+  }
+
+  .nx-lang-trigger-text {
+    display: none;
+  }
+
+  .nx-lang-trigger-btn {
+    padding: 0 9px;
+    gap: 0;
+  }
+
+  .nx-search-bar {
+    width: 135px;
+  }
+}
+
+/* Responsive Table Wrapper for Orders & Payments */
+.nx-table-responsive {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  margin-bottom: 12px;
+}
+
+/* Desktop defaults for Mobile Filter Elements */
+.nx-filter-head-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.nx-mobile-filter-close,
+.nx-mobile-filter-footer,
+.nx-mobile-filter-btn,
+.nx-shop-sidebar-backdrop {
+  display: none;
+}
+
+/* --------------------------------------------------------------------------
+   1. TABLET & SMALL LAPTOP (<= 860px)
+   -------------------------------------------------------------------------- */
+@media (max-width: 860px) {
+  /* Shop Mobile Filter Trigger & Slide-Over Filter Drawer */
+  .nx-shop-toolbar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .nx-shop-search-box {
+    flex: 1;
+    max-width: none;
+  }
+
+  .nx-mobile-filter-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    height: 44px;
+    padding: 0 15px;
+    border-radius: 10px;
+    border: 1px solid #e2e8f0;
+    background: #ffffff;
+    color: #0f172a;
+    font-size: 13.5px;
+    font-weight: 600;
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: all 0.18s ease;
+    box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
+  }
+
+  .nx-mobile-filter-btn.has-active {
+    border-color: #0f172a;
+    background: #0f172a;
+    color: #ffffff;
+  }
+
+  .nx-mobile-filter-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 19px;
+    height: 19px;
+    padding: 0 5px;
+    border-radius: 999px;
+    background: #ef4444;
+    color: #ffffff;
+    font-size: 11px;
+    font-weight: 700;
+    line-height: 1;
+  }
+
+  .nx-shop-sidebar-backdrop {
+    display: block;
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.48);
+    backdrop-filter: blur(3px);
+    -webkit-backdrop-filter: blur(3px);
+    z-index: 1200;
+    animation: nxFadeIn 0.2s ease;
+  }
+
+  .nx-shop-sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    width: 88%;
+    max-width: 350px;
+    background: #ffffff;
+    z-index: 1210;
+    transform: translateX(-105%);
+    transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+    box-shadow: 12px 0 36px rgba(15, 23, 42, 0.18);
+    display: flex;
+    flex-direction: column;
+  }
+
+  .nx-shop-sidebar.mobile-open {
+    transform: translateX(0);
+  }
+
+  .nx-shop-sidebar .nx-filter-card {
+    border: none;
+    border-radius: 0;
+    height: 100%;
+    max-height: 100vh;
+    overflow-y: auto;
+    padding: 18px 18px 88px;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .nx-mobile-filter-close {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    border: 1px solid #e2e8f0;
+    background: #f8fafc;
+    color: #0f172a;
+    cursor: pointer;
+    padding: 0;
+  }
+
+  .nx-mobile-filter-footer {
+    display: block;
+    position: sticky;
+    bottom: -18px;
+    background: #ffffff;
+    padding: 12px 0 6px;
+    margin-top: auto;
+    border-top: 1px solid #f1f5f9;
+  }
+
+  /* My Account Navigation -> Horizontal Scrollable Pill Bar on <= 860px */
+  .nx-account-sidebar {
+    overflow: hidden;
+  }
+
+  .nx-account-user-box {
+    padding: 14px 16px;
+  }
+
+  .nx-account-nav {
+    display: flex;
+    flex-direction: row;
+    overflow-x: auto;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+    padding: 8px 10px;
+    gap: 6px;
+    border-top: 1px solid #f1f5f9;
+  }
+
+  .nx-account-nav::-webkit-scrollbar {
+    display: none;
+  }
+
+  .nx-account-nav-btn {
+    width: auto;
+    flex-shrink: 0;
+    white-space: nowrap;
+    padding: 9px 14px;
+    border-radius: 999px;
+    font-size: 13px;
+    background: #f8fafc;
+  }
+
+  .nx-account-nav-btn.active {
+    background: #0f172a;
+    color: #ffffff;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   2. MOBILE NAVIGATION & TOAST CLEARANCE (<= 768px)
+   -------------------------------------------------------------------------- */
+@media (max-width: 768px) {
+  .nx-header-inner {
+    min-height: 58px;
+    padding: 8px 0;
+  }
+
+  .nx-main {
+    padding-top: 59px;
+  }
+
+  /* Elevate Toast above the fixed bottom navigation bar */
+  .ug-toast {
+    bottom: calc(74px + env(safe-area-inset-bottom, 6px));
+    right: 14px;
+    left: 14px;
+    max-width: calc(100vw - 28px);
+    padding: 12px 14px;
+    font-size: 13px;
+  }
+
+  /* Compact Logged-In Account Button so Header stays on a single clean row */
+  .nx-account-btn {
+    padding: 0;
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    justify-content: center;
+  }
+
+  .nx-account-btn > span:not(.nx-avatar-circle) {
+    display: none;
+  }
+
+  .nx-avatar-circle {
+    width: 32px;
+    height: 32px;
+  }
+
+  /* Store Locator & Delivery Route Maps */
+  .nx-osm-leaflet-container {
+    height: 320px;
+    min-height: 280px;
+  }
+
+  .nx-store-locator-header {
+    margin-bottom: 18px;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   3. LARGE PHONES & PHABLETS (<= 640px)
+   -------------------------------------------------------------------------- */
+@media (max-width: 640px) {
+  .nx-container {
+    padding: 0 14px;
+  }
+
+  .nx-header-inner {
+    padding: 10px 0;
+    gap: 8px;
+    flex-wrap: nowrap;
+    width: 100%;
+    min-width: 0;
+  }
+
+  .nx-header-left {
+    min-width: 0;
+    flex-shrink: 0;
+    gap: 8px;
+  }
+
+  .nx-header-right {
+    gap: 5px;
+    flex-wrap: nowrap;
+    min-width: 0;
+    flex: 1 1 auto;
+    justify-content: flex-end;
+  }
+
+  .nx-search-bar {
+    flex: 1 1 60px;
+    min-width: 60px;
+    max-width: 150px;
+    width: auto;
+    height: 36px;
+    padding: 0 10px;
+  }
+
+  /* Hero Section */
+  .nx-hero-section {
+    padding: 8px 0 4px;
+  }
+
+  .nx-hero-cozy-banner {
+    aspect-ratio: 4 / 3;
+    min-height: 230px;
+    border-radius: 10px;
+  }
+
+  .nx-hero-fallback-inner {
+    padding: 20px;
+  }
+
+  /* Category Slider */
+  .nx-category-banner {
+    padding: 20px 0 8px;
+  }
+
+  .nx-category-banner-head {
+    margin-bottom: 14px;
+  }
+
+  /* Product Grids (2 equal columns on mobile phones with zero clipping) */
+  .nx-our-products-section {
+    padding-top: 32px;
+    padding-bottom: 32px;
+  }
+
+  .nx-our-products-title {
+    margin-bottom: 22px;
+    font-size: 18px;
+  }
+
+  .nx-our-products-grid,
+  .nx-product-grid-4,
+  .nx-product-grid-3 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+    width: 100%;
+  }
+
+  .nx-op-card {
+    padding: 0;
+    width: 100%;
+    min-width: 0;
+  }
+
+  .nx-op-media-box {
+    display: block;
+    width: 100%;
+    aspect-ratio: 1 / 1.18;
+    padding: 0;
+  }
+
+  .nx-op-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  .nx-op-discount-badge-left {
+    top: 8px;
+    left: 8px;
+    font-size: 10px;
+    padding: 3px 6px;
+  }
+
+  .nx-op-price-badge {
+    top: 8px;
+    right: 8px;
+    font-size: 11px;
+    padding: 3px 6px;
+    gap: 4px;
+  }
+
+  .nx-op-original-price {
+    font-size: 10px;
+  }
+
+  .nx-op-info {
+    padding-top: 10px;
+    min-width: 0;
+    width: 100%;
+  }
+
+  .nx-op-title-row {
+    gap: 6px;
+    margin-bottom: 8px;
+    min-width: 0;
+    width: 100%;
+  }
+
+  .nx-op-name {
+    font-size: 13px;
+    min-width: 0;
+    flex: 1;
+  }
+
+  .nx-op-heart-btn {
+    width: 26px;
+    height: 26px;
+    flex-shrink: 0;
+  }
+
+  .nx-op-add-btn {
+    padding: 10px 4px;
+    font-size: 10.5px;
+    letter-spacing: 0.08em;
+    width: 100%;
+  }
+
+  /* Standard Shop Product Cards */
+  .nx-product-img-box {
+    height: 190px;
+  }
+
+  .nx-product-body {
+    padding: 12px;
+  }
+
+  .nx-product-title {
+    font-size: 13.5px;
+  }
+
+  .nx-price-current {
+    font-size: 15px;
+  }
+
+  .nx-product-footer .nx-btn-sm {
+    padding: 6px 10px;
+    font-size: 11.5px;
+  }
+
+  /* Page Banner (Shop) */
+  .nx-page-banner {
+    padding: 18px 16px;
+    margin-bottom: 16px;
+  }
+
+  .nx-page-banner h1 {
+    font-size: 20px;
+  }
+
+  .nx-page-banner p {
+    font-size: 12.5px;
+  }
+
+  /* Pagination */
+  .nx-pagination {
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 22px;
+  }
+
+  .nx-page-btn {
+    padding: 7px 12px;
+    font-size: 12.5px;
+  }
+
+  .nx-page-num {
+    width: 34px;
+    height: 34px;
+    font-size: 12.5px;
+  }
+
+  /* Product Details Page */
+  .nx-page-detail {
+    padding-top: 14px;
+  }
+
+  .nx-product-detail-layout {
+    gap: 20px;
+    margin-bottom: 32px;
+  }
+
+  .nx-detail-gallery-container {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .nx-detail-gallery-container .nx-detail-back-btn {
+    margin-right: 0;
+    margin-bottom: 2px;
+    width: 38px;
+    height: 38px;
+  }
+
+  .nx-detail-main-img-wrap {
+    order: 2;
+    width: 100%;
+    aspect-ratio: 1 / 1.15;
+    max-height: 440px;
+  }
+
+  .nx-detail-thumbs {
+    order: 3;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+    width: 100%;
+  }
+
+  .nx-thumb-btn {
+    width: 100%;
+    height: auto;
+    aspect-ratio: 1 / 1.12;
+  }
+
+  .nx-detail-title {
+    font-size: 22px;
+  }
+
+  .nx-detail-price {
+    font-size: 22px;
+  }
+
+  .nx-detail-original-price {
+    font-size: 15px;
+  }
+
+  .nx-detail-action-row {
+    margin-bottom: 24px;
+  }
+
+  .nx-detail-add-btn {
+    flex: 1;
+    width: auto;
+    max-width: none;
+    height: 48px;
+  }
+
+  /* Reviews Section */
+  .nx-reviews-section {
+    padding: 18px 14px;
+  }
+
+  /* Cart & Checkout Pages */
+  .nx-step-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+    margin-bottom: 18px;
+  }
+
+  .nx-step-header h1 {
+    font-size: 21px;
+  }
+
+  .nx-checkout-card,
+  .nx-summary-card,
+  .nx-account-panel {
+    padding: 16px 14px;
+  }
+
+  .nx-confirm-card {
+    padding: 24px 16px;
+  }
+
+  .nx-confirm-actions {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .nx-confirm-actions .nx-btn {
+    width: 100%;
+  }
+
+  /* My Account Orders & Addresses */
+  .nx-panel-head-row {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+  }
+
+  .nx-order-card {
+    padding: 14px 12px;
+  }
+
+  .nx-order-card-head,
+  .nx-order-card-foot {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .nx-order-totals {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  .nx-order-actions {
+    width: 100%;
+    flex-wrap: wrap;
+  }
+
+  /* Auth & PayWay Modals */
+  .ug-modal-backdrop {
+    padding: 12px;
+  }
+
+  .ug-small-modal {
+    padding: 20px 16px;
+    max-height: calc(100vh - 28px);
+    overflow-y: auto;
+    border-radius: 16px;
+  }
+
+  .ug-form-row-2 {
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+
+  /* Footer */
+  .nx-footer-inner {
+    gap: 24px;
+    padding: 32px 14px;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   4. COMPACT PHONES (<= 480px)
+   -------------------------------------------------------------------------- */
+@media (max-width: 480px) {
+  .nx-container {
+    padding: 0 12px;
+  }
+
+  .nx-header-inner {
+    gap: 6px;
+  }
+
+  .nx-brand {
+    gap: 6px;
+  }
+
+  .nx-brand-mark {
+    width: 28px;
+    height: 28px;
+    font-size: 12.5px;
+    border-radius: 7px;
+  }
+
+  .nx-brand-copy strong {
+    font-size: 11.5px;
+    letter-spacing: 0.02em;
+    white-space: nowrap;
+  }
+
+  .nx-header-right {
+    gap: 4px;
+  }
+
+  .nx-search-bar {
+    flex: 1 1 52px;
+    min-width: 52px;
+    max-width: 115px;
+    width: auto;
+    height: 32px;
+    padding: 0 7px;
+    gap: 4px;
+  }
+
+  .nx-search-bar input {
+    font-size: 11.5px;
+  }
+
+  .nx-lang-trigger-btn {
+    height: 32px;
+    padding: 0 6px;
+  }
+
+  .nx-lang-menu {
+    left: auto;
+    right: -40px;
+    min-width: 170px;
+  }
+
+  .nx-account-btn,
+  .nx-account-btn.nx-account-icon-only,
+  .nx-heart-btn,
+  .nx-cart-btn {
+    width: 32px;
+    height: 32px;
+  }
+
+  .nx-heart-icon,
+  .nx-cart-icon,
+  .nx-auth-icon {
+    width: 18px;
+    height: 18px;
+  }
+
+  .nx-our-products-grid,
+  .nx-product-grid-4,
+  .nx-product-grid-3 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+  }
+
+  .nx-op-card {
+    padding: 0;
+  }
+
+  .nx-op-discount-badge-left {
+    top: 6px;
+    left: 6px;
+    font-size: 9px;
+    padding: 2.5px 5px;
+  }
+
+  .nx-op-price-badge {
+    top: 6px;
+    right: 6px;
+    font-size: 10px;
+    padding: 2.5px 5px;
+    gap: 3px;
+  }
+
+  .nx-op-original-price {
+    font-size: 9px;
+  }
+
+  .nx-op-info {
+    padding-top: 8px;
+  }
+
+  .nx-op-title-row {
+    gap: 4px;
+    margin-bottom: 7px;
+  }
+
+  .nx-op-name {
+    font-size: 12px;
+  }
+
+  .nx-op-heart-btn {
+    width: 24px;
+    height: 24px;
+  }
+
+  .nx-op-heart-svg {
+    width: 15px;
+    height: 15px;
+  }
+
+  .nx-op-add-btn {
+    padding: 8.5px 4px;
+    font-size: 10px;
+    letter-spacing: 0.05em;
+  }
+
+  .nx-product-img-box {
+    height: 165px;
+  }
+
+  .nx-product-body {
+    padding: 10px;
+  }
+
+  .nx-product-footer {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+  }
+
+  .nx-product-footer .nx-btn-sm {
+    width: 100%;
+    justify-content: center;
+  }
+
+  /* Cart Item & Promo Row on Small Phones */
+  .nx-cart-item-img {
+    width: 72px;
+    height: 72px;
+  }
+
+  .nx-promo-row {
+    flex-direction: column;
+  }
+
+  .nx-promo-row .nx-btn {
+    width: 100%;
+  }
+
+  .nx-confirm-meta-grid {
+    grid-template-columns: 1fr;
+  }
+
+  /* Leaflet Map on Small Phones */
+  .nx-osm-leaflet-container {
+    height: 250px;
+    min-height: 230px;
+  }
+
+  .nx-osm-picker-card,
+  .nx-osm-route-card {
+    padding: 12px;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   5. EXTRA-SMALL PHONES (<= 350px)
+   -------------------------------------------------------------------------- */
+@media (max-width: 350px) {
+  .nx-brand-copy {
+    display: none;
+  }
+
+  .nx-search-bar {
+    flex: 1 1 50px;
+    min-width: 50px;
+  }
+
+  .nx-our-products-grid,
+  .nx-product-grid-4,
+  .nx-product-grid-3 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+  }
+}
+

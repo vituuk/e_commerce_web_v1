@@ -1,0 +1,191 @@
+/* ==========================================================================
+   AURA ATELIER — App Shell, Announcement Bar & Shared Buttons (.nx-*)
+   ========================================================================== */
+
+.nx-app {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: #f8fafc;
+  color: #0f172a;
+}
+
+.nx-container {
+  width: 100%;
+  max-width: 1600px;
+  margin: 0 auto;
+  padding: 0 clamp(18px, 3vw, 48px);
+}
+
+.status-history{
+  width: 50px;
+  height: 50px;
+  background-color: blue;
+}
+
+/* ---------- TOP ANNOUNCEMENT & 6-PAGE SWITCHER BAR ---------- */
+.nx-announcement {
+  background: #0f172a;
+  color: #e2e8f0;
+  font-size: 12px;
+  padding: 8px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.nx-announcement-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.nx-announcement-inner > span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 500;
+}
+
+.nx-page-switcher-pills {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.nx-switcher-label {
+  color: #94a3b8;
+  font-weight: 600;
+  margin-right: 4px;
+}
+
+.nx-mini-page-btn {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  color: #cbd5e1;
+  font-size: 11.5px;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.nx-mini-page-btn:hover {
+  background: rgba(255, 255, 255, 0.18);
+  color: #ffffff;
+}
+
+.nx-mini-page-btn.active {
+  background: #38bdf8;
+  border-color: #38bdf8;
+  color: #0f172a;
+  font-weight: 700;
+}
+
+/* ---------- SHARED BUTTONS & ERD BADGES ---------- */
+.nx-main {
+  flex: 1;
+  padding-top: 75px;
+  padding-bottom: 64px;
+}
+
+.nx-erd-table-pills {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-bottom: 12px;
+  font-size: 12px;
+  color: #64748b;
+}
+
+.nx-erd-table-pills code {
+  background: rgba(15, 23, 42, 0.08);
+  color: #0f172a;
+  padding: 3px 8px;
+  border-radius: 6px;
+  font-size: 11.5px;
+  font-weight: 600;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
+.nx-hero-overlay .nx-erd-table-pills {
+  color: #cbd5e1;
+}
+
+.nx-hero-overlay .nx-erd-table-pills code {
+  background: rgba(255, 255, 255, 0.16);
+  color: #ffffff;
+}
+
+.nx-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px 22px;
+  border-radius: 2px;
+  font-size: 13.5px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.18s ease;
+  border: 1px solid transparent;
+  margin-top: 10px;
+}
+
+.nx-btn-dark {
+  background: #0f172a;
+  color: #ffffff;
+}
+
+.nx-btn-dark:hover:not(:disabled) {
+  background: #1e293b;
+}
+
+.nx-btn-dark:disabled {
+  background: #94a3b8;
+  cursor: not-allowed;
+}
+
+.nx-btn-white {
+  background: #ffffff;
+  color: #0f172a;
+}
+
+.nx-btn-white:hover {
+  background: #f1f5f9;
+}
+
+.nx-btn-glass {
+  background: rgba(255, 255, 255, 0.15);
+  border-color: rgba(255, 255, 255, 0.3);
+  color: #ffffff;
+  backdrop-filter: blur(8px);
+}
+
+.nx-btn-outline {
+  background: #ffffff;
+  border-color: #cbd5e1;
+  color: #0f172a;
+}
+
+.nx-btn-outline:hover {
+  background: #f1f5f9;
+}
+
+.nx-btn-sm {
+  padding: 8px 14px;
+  font-size: 12.5px;
+  border-radius: 2px;
+}
+
+.nx-btn-full {
+  width: 100%;
+}
+
+.nx-btn-grow {
+  flex: 1;
+}
+

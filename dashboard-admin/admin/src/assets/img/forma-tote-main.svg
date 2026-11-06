@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240" width="240" height="240">
+  <defs>
+    <linearGradient id="bg3" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#f7f3ee" />
+      <stop offset="100%" stop-color="#eadfce" />
+    </linearGradient>
+    <filter id="shadow3" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="7" stdDeviation="6" flood-color="#172638" flood-opacity="0.14" />
+    </filter>
+  </defs>
+  <rect width="240" height="240" rx="24" fill="url(#bg3)" />
+  <g filter="url(#shadow3)">
+    <!-- Leather Straps -->
+    <path d="M92 92 C92 42, 148 42, 148 92" fill="none" stroke="#8c583a" stroke-width="8" stroke-linecap="round" />
+    <!-- Tote Bag Body -->
+    <path d="M62 88 L178 88 L168 190 C167 196, 162 200, 156 200 L84 200 C78 200, 73 196, 72 190 Z" fill="#232931" stroke="#15191e" stroke-width="2.5" stroke-linejoin="round" />
+    <!-- Outer Pocket -->
+    <rect x="88" y="122" width="64" height="52" rx="6" fill="#2e3640" stroke="#404b57" stroke-width="2" />
+    <!-- Brass Rivets -->
+    <circle cx="92" cy="96" r="3.5" fill="#e2b45c" />
+    <circle cx="148" cy="96" r="3.5" fill="#e2b45c" />
+    <!-- Brand Tag -->
+    <rect x="108" y="138" width="24" height="12" rx="2" fill="#d9c6b0" />
+  </g>
+</svg>
+
